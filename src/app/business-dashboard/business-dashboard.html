@@ -1,0 +1,234 @@
+<div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="logo">
+          <i class="icon-logo"></i>
+          <span class="logo-text">BusinessAssociate</span>
+        </div>
+        <nav class="nav-menu">
+          <ul>
+            <li class="nav-item" [class.active]="currentView() === 'dashboard'">
+              <a (click)="changeView('dashboard')">
+                <i class="icon-dashboard"></i>Dashboard
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'amc'">
+              <a (click)="changeView('amc')">
+                <i class="icon-amc"></i>AMC
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'ams'">
+              <a (click)="changeView('ams')">
+                <i class="icon-ams"></i>AMS
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'interviews'">
+              <a (click)="changeView('interviews')">
+                <i class="icon-interview"></i>Interview Details
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-content">
+            <h1 class="page-title">{{ pageTitle() }}</h1>
+            <p class="welcome-text">Hello, Welcome to AppMod Portal!</p>
+          </div>
+          <div class="user-actions">
+            <i class="icon-bell"></i>
+            <span class="sign-out">Sign out</span>
+          </div>
+        </header>
+
+        <!-- Dashboard View -->
+        @if (currentView() === 'dashboard') {
+          <section class="dashboard-widgets">
+            <div class="widget new-joiner-details">
+              <h3>New Joiner Details</h3>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>DOJ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let joiner of newJoiners()">
+                      <td>{{ joiner.name }}</td>
+                      <td>{{ joiner.location }}</td>
+                      <td>{{ joiner.doj }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-actions">
+                <button class="action-button export-btn">Export</button>
+                <a href="#" class="see-more">See More</a>
+              </div>
+            </div>
+
+            <div class="widget employee-billed">
+              <h3>Overall Employee-Billed</h3>
+              <div class="chart-container">
+                <div class="chart-content">
+                  <div class="pie-chart" [style.background]="pieChartGradient()"></div>
+                  <div class="chart-legend">
+                    <div class="legend-item" *ngFor="let item of pieChartData.labels; let i = index">
+                      <span class="legend-color" [style.background-color]="pieChartData.datasets[0].backgroundColor[i]"></span>
+                      {{ item }} ({{ pieChartData.datasets[0].data[i] }})
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          
+          <section class="widget recent-interviews">
+            <header class="section-header">
+              <h3>Recent AMC Interview Results</h3>
+              <div class="date-picker-container">
+                <a href="#" class="view-history">View Full History</a>
+              </div>
+            </header>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Tech</th>
+                    <th>Feedback</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let result of filteredInterviewResults()">
+                    <td>
+                      {{ result.name }}
+                    </td>
+                    <td>{{ result.date }}</td>
+                    <td>{{ result.category }}</td>
+                    <td>{{ result.feedback }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+
+        <!-- AMC View -->
+        @if (currentView() === 'amc') {
+          <section class="widget amc-table-section">
+        
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Emp ID</th>
+                            <th>Emp Name</th>
+                            <th>Resume</th>
+                            <th>Recent Interview Feedback</th>
+                            <th>AMS</th>
+                            <th>UdamayTrack</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of amcData(); track item.empId) {
+                            <tr (click)="onRowClick(item)">
+                                <td>{{ item.empId }}</td>
+                                <td>{{ item.empName }}</td>
+                                <td>{{ item.resume }}</td>
+                                <td>{{ item.feedback }}</td>
+                                <td>{{ item.ams }}</td>
+                                <td>{{ item.udamayTrack }}</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-actions">
+              <button class="action-button export-btn">Export</button>
+              <a href="#" class="see-more">See More</a>
+            </div>
+          </section>
+        }
+
+        <!-- AMS View -->
+        @if (currentView() === 'ams') {
+          <section class="widget amc-table-section">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>AMS E.id</th>
+                            <th>AMS Name</th>
+                            <th>Assigned AMC Count</th>
+                            <th>Tech Stack</th>
+                            <th>Manager Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of amsData(); track item.amsEid) {
+                            <tr (click)="onRowClick(item)">
+                                <td>{{ item.amsEid }}</td>
+                                <td>{{ item.amsName }}</td>
+                                <td>{{ item.assignedAmcCount }}</td>
+                                <td>{{ item.techStack }}</td>
+                                <td>{{ item.managerName }}</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-actions">
+              <button class="action-button export-btn">Export</button>
+              <a href="#" class="see-more">See More</a>
+            </div>
+          </section>
+        }
+
+        <!-- Interview Details View -->
+        @if (currentView() === 'interviews') {
+            <section class="widget recent-interviews">
+                <header class="section-header">
+                  <h3>Recent AMC Interview Results</h3>
+                  <div class="date-picker-container">
+                    <input type="date" [(ngModel)]="startDate" (change)="filterByDate()">
+                    <span>-</span>
+                    <input type="date" [(ngModel)]="endDate" (change)="filterByDate()">
+                  </div>
+                </header>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Tech</th>
+                        <th>Feedback</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let result of filteredInterviewResults()">
+                        <td>
+                          {{ result.name }}
+                        </td>
+                        <td>{{ result.date }}</td>
+                        <td>{{ result.category }}</td>
+                        <td>{{ result.feedback }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="table-actions">
+              <button class="action-button export-btn">Export</button>
+              <a href="#" class="see-more">See More</a>
+            </div>
+              </section>
+        }
+        
+      </main>
+    </div>
