@@ -92,13 +92,13 @@
 
     .main-content {
       flex-grow: 1;
-      background-color: #1a1a1a;
+      background-color: #612731;
       padding: 2rem;
       overflow-y: auto;
     }
 
     .header {
-      background-color: #1a1a1a;
+      background-color: #612731;
       padding-bottom: 1rem;
       border-bottom: 1px solid #333;
       margin-bottom: 2rem;
