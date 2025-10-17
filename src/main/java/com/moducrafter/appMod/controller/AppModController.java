@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@Slf4j
 @RequestMapping("/api/employee")
 public class AppModController {
     private static final Logger log = LoggerFactory.getLogger(AppModController.class);
@@ -43,8 +42,8 @@ public class AppModController {
     }
 
 
-    @PostMapping(value = "addProfile")
-    public ResponseEntity<Employee> addEmployee(@Validated @RequestPart("emp") Employee emp,
+  @PostMapping(value = "addProfile", consumes = {"multipart/form-data"})
+  public ResponseEntity<Employee> addEmployee(@Validated @RequestPart("emp") Employee emp,
                                                 @RequestPart("file") MultipartFile file) throws IOException {
         emp.setResume(file.getBytes());
         Employee savedEmp = appModService.addProfile(emp);

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,42 +26,54 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    public List<InterviewDetails> getAllInterviewDetails() {
-        // Retrieves all records, sorted by date descending (most recent first)
-        return interviewDetailsRepository.findAllByOrderByInterviewDateDesc();
-    }
+  @Transactional
+  @Override
+  public InterviewDetails saveNewInterview(InterviewDetails interviewDetails) {
+    return interviewDetailsRepository.save(interviewDetails);
+  }
 
 
     @Override
     public List<EmployeeInterviewSummaryDTO> getEmployeeInterviewSummary() {
-        List<InterviewDetails> allInterviews = interviewDetailsRepository.findAll();
+      // 1. Fetch all interview details to build the map
+      List<InterviewDetails> allInterviews = interviewDetailsRepository.findAll();
 
-        // Group by employee and find the most recent interview for each
-        Map<Employee, InterviewDetails> latestInterviewMap = allInterviews.stream()
-                .collect(Collectors.toMap(
-                        InterviewDetails::getEmployee,
-                        interview -> interview,
-                        (existing, replacement) ->
-                                (existing.getInterviewDate().isAfter(replacement.getInterviewDate()) ? existing : replacement)
-                ));
+      Map<Employee, InterviewDetails> latestInterviewMap = allInterviews.stream()
+        .filter(details -> details.getInterviewDate() != null) // Essential to avoid NPE
+        .collect(Collectors.toMap(
+          InterviewDetails::getEmployee,
+          interview -> interview,
+          (existing, replacement) ->
+            (existing.getInterviewDate().isAfter(replacement.getInterviewDate()) ? existing : replacement)
+        ));
 
-        // Map to the DTO
-        return latestInterviewMap.entrySet().stream()
-                .map(entry -> {
-                    Employee emp = entry.getKey();
-                    InterviewDetails recentInterview = entry.getValue();
+      // Fetch ALL employees from the repository (necessary to include those with no interviews)
+      List<Employee> allEmployees = employeeRepository.findAll(); // <-- ASSUMPTION: You have an EmployeeRepository
 
-                    return new EmployeeInterviewSummaryDTO(
-                            emp.getEmpId(),
-                            emp.getName(), // Assuming Employee entity has a getName() method
-                            recentInterview.getTechnologyStack(),
-                            recentInterview.getClientName(),
-                            recentInterview.getInterviewDate(),
-                            recentInterview.getResult(),
-                            recentInterview.getFeedback()
-                    );
-                })
-                .collect(Collectors.toList());
+      // Map ALL employees to the DTO
+      return allEmployees.stream()
+        .map(employee -> {
+          // Check if the employee is present in the map (i.e., has a recorded interview)
+          InterviewDetails recentInterview = latestInterviewMap.get(employee);
+
+          // Conditional assignment: use details if available, otherwise use null
+          String technologyStack = (recentInterview != null) ? recentInterview.getTechnologyStack() : null;
+          String clientName = (recentInterview != null) ? recentInterview.getClientName() : null;
+          LocalDate interviewDate = (recentInterview != null) ? recentInterview.getInterviewDate() : null;
+          String result = (recentInterview != null) ? recentInterview.getResult() : null;
+          String feedback = (recentInterview != null) ? recentInterview.getFeedback() : null;
+
+          return new EmployeeInterviewSummaryDTO(
+            employee.getEmpId(),
+            employee.getName(),
+            technologyStack,
+            clientName,
+            interviewDate,
+            result,
+            feedback
+          );
+        })
+        .collect(Collectors.toList());
     }
     public List<InterviewDetails> getInterviewsByEmployeeId(int empId) {
         // Uses the custom repository method: sorted by date descending (most recent first)
@@ -81,7 +94,7 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         newInterview.setTechnologyStack(request.getTechnologyStack());
         newInterview.setFeedback(request.getFeedback());
         newInterview.setResult(request.getResult());
-       // newInterview.setCreatedTs(LocalDateTime.now());
+        //newInterview.setCreatedTs(LocalDateTime.now());
 
         return interviewDetailsRepository.save(newInterview);
     }
@@ -98,6 +111,9 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         }
         if (request.getFeedback() != null) {
             existingInterview.setFeedback(request.getFeedback());
+        }
+        if(request.getInterviewDate()!=null){
+          existingInterview.setInterviewDate(request.getInterviewDate());
         }
 
         // Optionally update a lastUpdatedTs audit field here if you add it to the entity

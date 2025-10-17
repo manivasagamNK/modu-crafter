@@ -1,5 +1,6 @@
 package com.moducrafter.appMod.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class InterviewDetails {
     private int interviewId;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "EMP_ID", referencedColumnName = "EMP_ID",nullable = false)
+    @JsonIgnore
     private Employee employee;
     @Column(name = "TECHNOLOGY_STACK")
     private String technologyStack; // Added based on dashboard screenshot

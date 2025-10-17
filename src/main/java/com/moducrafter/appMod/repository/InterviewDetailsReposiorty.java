@@ -8,8 +8,5 @@ import java.util.List;
 
 @Repository
 public interface InterviewDetailsReposiorty extends JpaRepository<InterviewDetails,Integer> {
-    List<InterviewDetails> findAllByOrderByInterviewDateDesc();
     List<InterviewDetails> findByEmployeeEmpIdOrderByInterviewDateDesc(int empId);
-
-
 }
