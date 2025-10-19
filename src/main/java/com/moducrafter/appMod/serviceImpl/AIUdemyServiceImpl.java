@@ -1,5 +1,7 @@
-package com.moducrafter.appMod.service;
+package com.moducrafter.appMod.serviceImpl;
 
+import com.moducrafter.appMod.dto.ResumeParserResponse;
+import com.moducrafter.appMod.service.AIUdemyService;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
