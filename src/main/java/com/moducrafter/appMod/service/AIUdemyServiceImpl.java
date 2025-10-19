@@ -1,16 +1,22 @@
 package com.moducrafter.appMod.service;
 
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.xml.sax.SAXException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,18 +24,16 @@ import java.util.Map;
 @Service
 public class AIUdemyServiceImpl implements AIUdemyService {
 
-  // Use property for the Gemini API Key
-  // Recommended practice is to use GOOGLE_API_KEY environment variable
+
   @Value("${ai.api.key:${AI_API_KEY:}}")
   private String aiApiKey;
 
   @Value("${ai.api.url}")
   private String aiApiUrl;
 
-  // Use the RestTemplate initialized once
   private final RestTemplate restTemplate = new RestTemplate();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-  // Define the System Instruction for JSON output
   private static final String SYSTEM_INSTRUCTION =
     "You are an expert AI that recommends the top 3 Udemy courses based on skill gaps identified in the interview feedback. " +
       "You MUST return your entire response as a single, valid JSON object following this strict schema: " +
@@ -44,17 +48,13 @@ public class AIUdemyServiceImpl implements AIUdemyService {
       return "{\"error\": \"API Key not configured.\"}";
     }
 
-    // --- 1. Construct the Final URL with API Key ---
-    // For the Generative Language API, the key is passed as a query parameter
     String fullUrl = aiApiUrl + "?key=" + aiApiKey;
 
     String userPrompt = "Interview Feedback: \"" + feedback + "\"";
 
-    // --- 2. Build HTTP Headers ---
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    // --- 3. Build the Request Body (Gemini API Structure) ---
     Map<String, Object> body = new HashMap<>();
     body.put("systemInstruction", Map.of(
       "parts", List.of(
@@ -63,11 +63,9 @@ public class AIUdemyServiceImpl implements AIUdemyService {
     ));
     body.put("generationConfig", Map.of(
       "responseMimeType", "application/json"
-      // You can also add "temperature", 0.1, etc. here
     ));
 
 
-    // The user's prompt content
     body.put("contents", List.of(
       Map.of("role", "user", "parts", List.of(
         Map.of("text", userPrompt)
@@ -77,7 +75,6 @@ public class AIUdemyServiceImpl implements AIUdemyService {
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
     try {
-      // --- 4. Execute the API Call ---
       ResponseEntity<Map> response = restTemplate.exchange(
         fullUrl,
         HttpMethod.POST,
@@ -85,7 +82,6 @@ public class AIUdemyServiceImpl implements AIUdemyService {
         Map.class
       );
 
-      // --- 5. Robust Parsing of Gemini Response ---
       Map<String, Object> responseBody = response.getBody();
 
       List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
@@ -101,10 +97,8 @@ public class AIUdemyServiceImpl implements AIUdemyService {
       Map<String, Object> contentMap = (Map<String, Object>) candidates.get(0).get("content");
       List<Map<String, Object>> parts = (List<Map<String, Object>>) contentMap.get("parts");
 
-      // The JSON output is the text content of the first part
       String jsonOutput = parts.get(0).get("text").toString().trim();
 
-      // The API sometimes wraps the JSON in ```json...```, this removes it.
       if (jsonOutput.startsWith("```json")) {
         jsonOutput = jsonOutput.substring(7, jsonOutput.lastIndexOf("```")).trim();
       }
@@ -116,11 +110,136 @@ public class AIUdemyServiceImpl implements AIUdemyService {
       return "{\"error\": \"API Request Failed: " + e.getStatusCode() + "\", \"details\": \"" + e.getResponseBodyAsString().replaceAll("\"", "'") + "\"}";
     } catch (ResourceAccessException e) {
       System.err.println("Network/Connection Error: " + e.getMessage());
-      return "{\"error\": \"Network Error: Could not connect to Gemini API.\"}";
+      return "{\"error\": \"Network Error: Could not connect to  API.\"}";
     } catch (Exception e) {
       System.err.println("Unknown Error during API call or parsing: " + e.getMessage());
       e.printStackTrace();
       return "{\"error\": \"Internal processing error.\"}";
+    }
+  }
+
+  @Override
+  public List<String> extractSkills(String extractedText) {
+    if (extractedText == null || extractedText.trim().isEmpty()) {
+      return List.of();
+    }
+
+    try {
+      // Define the Structured JSON Schema (as a Map)
+      Map<String, Object> skillsSchema = Map.of(
+        "type", "object",
+        "properties", Map.of(
+          "extractedSkills", Map.of(
+            "type", "array",
+            "items", Map.of("type", "string")
+          )
+        ),
+        "required", List.of("extractedSkills")
+      );
+
+      String prompt = buildExtractionPrompt(extractedText);
+
+      Map<String, Object> requestBody = Map.of(
+        "contents", List.of(
+          Map.of(
+            "role", "user",
+            "parts", List.of(
+              Map.of("text", prompt)
+            )
+          )
+        ),
+        "generationConfig", Map.of(
+          "responseMimeType", "application/json",
+          "responseSchema", skillsSchema
+        )
+      );
+
+      // Prepare Headers and Entity
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      String fullUrl = aiApiUrl + "?key=" + aiApiKey;
+      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+      // 4. Execute the API Call
+      ResponseEntity<Map> response = restTemplate.exchange(
+        fullUrl,
+        HttpMethod.POST,
+        entity,
+        Map.class
+      );
+
+      if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+
+        // Navigate the nested response Map structure: candidates -> content -> parts -> text
+        List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
+
+        if (candidates != null && !candidates.isEmpty()) {
+          Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+          List<Map<String, String>> parts = (List<Map<String, String>>) content.get("parts");
+          String jsonSkillsString = parts.get(0).get("text");
+
+
+          ResumeParserResponse parserResponse =
+            objectMapper.readValue(jsonSkillsString, ResumeParserResponse.class);
+
+          return parserResponse.getExtractedSkills() != null ?
+            parserResponse.getExtractedSkills() :
+            List.of();
+        }
+      }
+
+    } catch (Exception e) {
+      System.err.println("Error calling Gemini API: " + e.getMessage());
+      e.printStackTrace();
+    }
+
+    return List.of();
+  }
+
+  private String buildExtractionPrompt(String resumeText) {
+    return """
+      Analyze the following resume text. Your task is to **focus primarily on the 'Technologies' and 'Professional Overview' sections** to identify technical skills.
+
+      Extract all technical skills, programming languages, frameworks, databases, and DevOps/Cloud tools (like Apache Kafka or GCP).
+
+      Do not include non-technical terms like 'Mentorship', 'Payment', 'Risk', 'compliance', 'ERP', 'AC', or 'SCM' in the final list.
+
+      Generate the output as a JSON object that strictly adheres to the provided schema.
+      The array of skills must be under the key "extractedSkills".
+
+      RESUME TEXT:
+      ---
+      """ + resumeText + "\n---";
+  }
+
+  @Override
+  public Map<String, Object> extractCourseDetails(InputStream courseFileStream, String fileName) {
+
+    AutoDetectParser parser = new AutoDetectParser();
+    BodyContentHandler handler = new BodyContentHandler(-1);
+    Metadata metadata = new Metadata();
+
+    //  TikaInputStream for robust content type detection
+    try (TikaInputStream tikaInputStream = TikaInputStream.get(courseFileStream)) {
+
+      metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, fileName);
+
+      parser.parse(tikaInputStream, handler, metadata);
+
+      Map<String, Object> results = new HashMap<>();
+
+      results.put("content", handler.toString());
+
+      Map<String, String> metadataMap = new HashMap<>();
+      for (String name : metadata.names()) {
+        metadataMap.put(name, metadata.get(name));
+      }
+      results.put("metadata", metadataMap);
+
+      return results;
+    } catch (IOException | TikaException | SAXException e) {
+      throw new RuntimeException(e);
     }
   }
 }

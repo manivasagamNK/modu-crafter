@@ -47,16 +47,12 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
             (existing.getInterviewDate().isAfter(replacement.getInterviewDate()) ? existing : replacement)
         ));
 
-      // Fetch ALL employees from the repository (necessary to include those with no interviews)
-      List<Employee> allEmployees = employeeRepository.findAll(); // <-- ASSUMPTION: You have an EmployeeRepository
+      List<Employee> allEmployees = employeeRepository.findAll();
 
-      // Map ALL employees to the DTO
       return allEmployees.stream()
         .map(employee -> {
-          // Check if the employee is present in the map (i.e., has a recorded interview)
           InterviewDetails recentInterview = latestInterviewMap.get(employee);
 
-          // Conditional assignment: use details if available, otherwise use null
           String technologyStack = (recentInterview != null) ? recentInterview.getTechnologyStack() : null;
           String clientName = (recentInterview != null) ? recentInterview.getClientName() : null;
           LocalDate interviewDate = (recentInterview != null) ? recentInterview.getInterviewDate() : null;
@@ -76,7 +72,6 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         .collect(Collectors.toList());
     }
     public List<InterviewDetails> getInterviewsByEmployeeId(int empId) {
-        // Uses the custom repository method: sorted by date descending (most recent first)
         return interviewDetailsRepository.findByEmployeeEmpIdOrderByInterviewDateDesc(empId);
     }
 
@@ -105,7 +100,6 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         InterviewDetails existingInterview = interviewDetailsRepository.findById(interviewId)
                 .orElseThrow(() -> new EntityNotFoundException("Interview record not found with ID: " + interviewId));
 
-        // Requirement: Result and Feedback can be updated anytime
         if (request.getResult() != null) {
             existingInterview.setResult(request.getResult());
         }
@@ -116,7 +110,6 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
           existingInterview.setInterviewDate(request.getInterviewDate());
         }
 
-        // Optionally update a lastUpdatedTs audit field here if you add it to the entity
 
         return interviewDetailsRepository.save(existingInterview);
     }

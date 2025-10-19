@@ -10,7 +10,7 @@ import java.util.List;
 public interface InterviewDetailsService {
 
     InterviewDetails addInterviewDetails(InterviewDetailsRequest request);
-  InterviewDetails saveNewInterview(InterviewDetails interviewDetails);
+    InterviewDetails saveNewInterview(InterviewDetails interviewDetails);
     List<EmployeeInterviewSummaryDTO> getEmployeeInterviewSummary();
     List<InterviewDetails> getInterviewsByEmployeeId(int empId);
     InterviewDetails updateInterviewResult(int interviewId, UpdateResultRequest request);

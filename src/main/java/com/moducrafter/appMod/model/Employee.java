@@ -31,6 +31,7 @@ public class Employee {
     private LocalDate dateOfJoining;
 
     @Column(name = "TECH_STACK")
+    @Lob
     private String techStack;
 
     @Column(name = "LOCATION")
