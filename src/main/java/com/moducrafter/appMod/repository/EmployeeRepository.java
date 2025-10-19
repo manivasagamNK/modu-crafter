@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     Optional<Employee> findByEmpId(int id);
     List<Employee> findAll();
     Employee save(Employee emp);
+  List<Employee> findByRole(String role);
+  List<Employee> findByRoleIsNullOrAmsNameIsNullOrManagerNameIsNull();
 
 }

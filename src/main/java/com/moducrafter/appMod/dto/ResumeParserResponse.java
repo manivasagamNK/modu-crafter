@@ -1,4 +1,4 @@
-package com.moducrafter.appMod.service;
+package com.moducrafter.appMod.dto;
 
 import lombok.Data;
 

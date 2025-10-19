@@ -8,7 +8,6 @@ import java.util.Date;
 
 @Data
 public class InterviewDetailsRequest {
-    // Employee ID to link the interview (Foreign Key)
     private int empId;
 
     private LocalDate interviewDate;

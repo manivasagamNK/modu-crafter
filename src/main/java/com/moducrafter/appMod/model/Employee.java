@@ -20,9 +20,8 @@ import java.util.List;
 @Table(name = "EMPLOYEE")
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "EMP_ID")
-    private int empId;
+    private Integer empId;
 
     @Column(name = "NAME")
     private String name;
@@ -42,12 +41,25 @@ public class Employee {
     @JsonIgnore
     private byte[] resume;
 
-    @Column(name = "INSERT_TS")
-    private LocalDateTime timeStamp;
-
   // One Employee can have Many Interview Details records
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @JsonIgnore
-  private List<InterviewDetails> interviewDetailsList; // Added relationship list
+  private List<InterviewDetails> interviewDetailsList;
+
+  @Column(name = "AMS_NAME")
+  private String amsName;
+
+  @Column(name = "MANAGER_NAME")
+  private String managerName;
+
+  @Column(name = "ROLE")
+  private String role;
+
+  @Column(name = "IS_BILLABLE")
+  private Boolean isBillable;
+
+  @Column(name = "INSERT_TS")
+  private LocalDateTime updatedTime;
+
 
 }
