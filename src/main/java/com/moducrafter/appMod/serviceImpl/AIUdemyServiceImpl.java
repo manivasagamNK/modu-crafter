@@ -127,7 +127,6 @@ public class AIUdemyServiceImpl implements AIUdemyService {
     }
 
     try {
-      // Define the Structured JSON Schema (as a Map)
       Map<String, Object> skillsSchema = Map.of(
         "type", "object",
         "properties", Map.of(

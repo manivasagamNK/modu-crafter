@@ -13,4 +13,6 @@ public interface EmployeeService {
     Employee addProfile(Employee employee);
    List<Employee> findEmployeesNeedingMapping();
    Employee updateEmployeeMapping(MappingDTO dto);
+   Employee updateBillableStatus(int empId, Boolean isBillable);
+   List<Employee> findAMCsBySupervisorScope(int supervisorId);
 }
