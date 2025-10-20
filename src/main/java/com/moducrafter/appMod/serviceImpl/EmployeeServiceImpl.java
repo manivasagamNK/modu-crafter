@@ -13,9 +13,7 @@ import lombok.extern.slf4j.XSlf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,7 +30,6 @@ public class EmployeeServiceImpl implements EmployeeService {
   private InterviewDetailsService interviewDetailsService;
   @Autowired
   private ApplicationEventPublisher eventPublisher;
-
   private static final Logger log = LoggerFactory.getLogger(EmployeeServiceImpl.class);
 
     @Override
@@ -96,6 +93,37 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     return updatedEmployee;
     }
+
+  @Override
+  @Transactional
+  public Employee updateBillableStatus(int empId, Boolean isBillable) {
+
+    Employee employee = employeeRepository.findById(empId)
+      .orElseThrow(() -> new IllegalArgumentException("Employee not found with ID: " + empId));
+
+    employee.setIsBillable(isBillable);
+    employee.setUpdatedTime(LocalDateTime.now());
+
+    return employeeRepository.save(employee);
+  }
+
+
+  @Override
+  public List<Employee> findAMCsBySupervisorScope(int supervisorId) {
+    Employee supervisor = employeeRepository.findById(supervisorId)
+      .orElseThrow(() -> new RuntimeException("Supervisor not found with ID: " + supervisorId));
+
+    // Step 2: Extract the supervisor's scope (AMS_NAME).
+    // The AMS is defined by the project/team name they oversee.
+    String scopeAmsName = supervisor.getAmsName();
+
+    if (scopeAmsName == null || scopeAmsName.trim().isEmpty()) {
+      return List.of();
+    }
+
+    return employeeRepository.findByRoleAndAmsName("AMC", scopeAmsName);
+  }
+
 
   private void createInitialInterviewEntry(Employee employee) {
     InterviewDetails initialEntry = new InterviewDetails();

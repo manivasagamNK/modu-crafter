@@ -25,6 +25,11 @@ public class Employee {
 
     @Column(name = "NAME")
     private String name;
+  @Column(name = "USERNAME")
+  private String username;
+
+  @Column(name = "PASSWORD_HASH")
+  private String passwordHash;
 
     @Column(name = "DOJ")
     private LocalDate dateOfJoining;
@@ -41,7 +46,6 @@ public class Employee {
     @JsonIgnore
     private byte[] resume;
 
-  // One Employee can have Many Interview Details records
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @JsonIgnore
   private List<InterviewDetails> interviewDetailsList;
