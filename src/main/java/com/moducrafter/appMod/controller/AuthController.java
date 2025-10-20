@@ -29,7 +29,7 @@ public class AuthController {
     if (!user.getPasswordHash().equals(request.getPassword())) {
       throw new EntityNotFoundException("Invalid Username/Password.");
     }
-
     return ResponseEntity.ok(user);
   }
+
 }

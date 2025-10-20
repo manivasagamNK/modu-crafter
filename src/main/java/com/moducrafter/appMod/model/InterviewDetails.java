@@ -27,7 +27,7 @@ public class InterviewDetails {
     @JsonIgnore
     private Employee employee;
     @Column(name = "TECHNOLOGY_STACK")
-    private String technologyStack;
+     private String technologyStack;
     @Column(name = "INTERVIEW_DATE")
     private LocalDate interviewDate;
     @Column(name = "CLIENT_NAME")

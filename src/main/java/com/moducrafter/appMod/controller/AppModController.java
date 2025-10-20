@@ -36,17 +36,17 @@ public class AppModController {
   @Autowired
   private EmployeeRepository employeeRepository;
 
-    @GetMapping
-    public ResponseEntity getEmployeeName(@RequestParam int id){
-        log.info(String.valueOf(id));
-        Employee emp = employeeService.getEmployee(id);
-        return ResponseEntity.status(HttpStatus.OK).body(Objects.requireNonNullElse(emp, "Please correct the Employee Id"));
-    }
+  @GetMapping
+  public ResponseEntity getEmployeeName(@RequestParam int id){
+    log.info(String.valueOf(id));
+    Employee emp = employeeService.getEmployee(id);
+    return ResponseEntity.status(HttpStatus.OK).body(Objects.requireNonNullElse(emp, "Please correct the Employee Id"));
+  }
 
-    @GetMapping("/employee/getEmployees")
-    public ResponseEntity<List<Employee>> getEmployees(){
-        return ResponseEntity.ok(employeeService.getEmployees());
-    }
+  @GetMapping("/employee/getEmployees")
+  public ResponseEntity<List<Employee>> getEmployees(){
+    return ResponseEntity.ok(employeeService.getEmployees());
+  }
 
 
   @PostMapping(value = "/employee/addProfile", consumes = {"multipart/form-data"})
@@ -82,11 +82,11 @@ public class AppModController {
         .body(null);
     }
   }
- @GetMapping("/employee/mapping/new-joiners")
- public ResponseEntity<List<Employee>> getNewJoiners() {
-   List<Employee> newJoiners = employeeService.findEmployeesNeedingMapping();
-   return ResponseEntity.ok(newJoiners);
- }
+  @GetMapping("/employee/mapping/new-joiners")
+  public ResponseEntity<List<Employee>> getNewJoiners() {
+    List<Employee> newJoiners = employeeService.findEmployeesNeedingMapping();
+    return ResponseEntity.ok(newJoiners);
+  }
   // Get employees assigned to the AMC Role
   @GetMapping("/employee/role/amc")
   public ResponseEntity<List<Employee>> getAMCEmployees() {
@@ -105,19 +105,19 @@ public class AppModController {
     return ResponseEntity.ok(updatedEmp);
   }
 
-    @GetMapping("/amc-details")
-    public ResponseEntity<List<Employee>> getAMCTeamDetails(@RequestHeader("X-Auth-User-Id") int authUserId)
-    {
-      Employee supervisor = employeeRepository.findById(authUserId)
-        .orElseThrow(() -> new EntityNotFoundException("Auth user not found."));
+  @GetMapping("/amc-details")
+  public ResponseEntity<List<Employee>> getAMCTeamDetails(@RequestHeader("X-Auth-User-Id") int authUserId)
+  {
+    Employee supervisor = employeeRepository.findById(authUserId)
+      .orElseThrow(() -> new EntityNotFoundException("Auth user not found."));
 
-      if (!"AMS".equalsIgnoreCase(supervisor.getRole())) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Unauthorized
-      }
-
-      List<Employee> amcTeam = employeeService.findAMCsBySupervisorScope(authUserId);
-      return ResponseEntity.ok(amcTeam);
+    if (!"AMS".equalsIgnoreCase(supervisor.getRole())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Unauthorized
     }
+
+    List<Employee> amcTeam = employeeService.findAMCsBySupervisorScope(authUserId);
+    return ResponseEntity.ok(amcTeam);
+  }
 
 
   /**
@@ -136,6 +136,5 @@ public class AppModController {
     Employee updatedEmployee = employeeService.updateBillableStatus(empId, isBillable);
     return ResponseEntity.ok(updatedEmployee);
   }
-
 
 }
