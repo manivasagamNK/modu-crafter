@@ -3,6 +3,7 @@ package com.moducrafter.appMod.serviceImpl;
 import com.moducrafter.appMod.dto.EmployeeInterviewSummaryDTO;
 import com.moducrafter.appMod.dto.InterviewDetailsRequest;
 import com.moducrafter.appMod.dto.UpdateResultRequest;
+import com.moducrafter.appMod.events.InterviewNotificationEvent;
 import com.moducrafter.appMod.model.Employee;
 import com.moducrafter.appMod.model.InterviewDetails;
 import com.moducrafter.appMod.repository.EmployeeRepository;
@@ -10,10 +11,12 @@ import com.moducrafter.appMod.repository.InterviewDetailsReposiorty;
 import com.moducrafter.appMod.service.InterviewDetailsService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +28,8 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+  @Autowired
+  private ApplicationEventPublisher eventPublisher;
 
   @Transactional
   @Override
@@ -89,9 +94,12 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         newInterview.setTechnologyStack(request.getTechnologyStack());
         newInterview.setFeedback(request.getFeedback());
         newInterview.setResult(request.getResult());
-        //newInterview.setCreatedTs(LocalDateTime.now());
-
-        return interviewDetailsRepository.save(newInterview);
+        newInterview.setLastUpdatedTs(LocalDateTime.now());
+      InterviewDetails savedDetails = interviewDetailsRepository.save(newInterview);
+      eventPublisher.publishEvent(
+        new InterviewNotificationEvent(savedDetails, employee.getName(), "SCHEDULED")
+      );
+        return savedDetails;
     }
 
     // 4. PUT Logic (Update Result/Feedback)
@@ -109,8 +117,12 @@ public class InterviewDetailsServiceImpl implements InterviewDetailsService {
         if(request.getInterviewDate()!=null){
           existingInterview.setInterviewDate(request.getInterviewDate());
         }
+      existingInterview.setLastUpdatedTs(LocalDateTime.now());
+      InterviewDetails updatedDetails = interviewDetailsRepository.save(existingInterview);
+      eventPublisher.publishEvent(
+        new InterviewNotificationEvent(updatedDetails, updatedDetails.getEmployee().getName(), "UPDATED_FEEDBACK")
+      );
 
-
-        return interviewDetailsRepository.save(existingInterview);
+        return updatedDetails;
     }
 }
