@@ -10,7 +10,7 @@ import java.util.Date;
 public class EmployeeInterviewSummaryDTO {
     private int empId;
     private String name;
-    private String techStack; // comes from Employee table
+    private String techStack;
     private String recentClient;
     private LocalDate recentDate;
     private String recentResult;

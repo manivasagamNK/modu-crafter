@@ -9,7 +9,6 @@ import java.util.Date;
 @Data
 public class InterviewDetailsRequest {
     private int empId;
-
     private LocalDate interviewDate;
     private String clientName;
     private String technologyStack;

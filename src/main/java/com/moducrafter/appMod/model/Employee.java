@@ -19,29 +19,33 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "EMPLOYEE")
 public class Employee {
-    @Id
-    @Column(name = "EMP_ID")
-    private Integer empId;
+  @Id
+  @Column(name = "EMP_ID")
+  private Integer empId;
 
-    @Column(name = "NAME")
-    private String name;
+  @Column(name = "NAME")
+  private String name;
+  @Column(name = "USERNAME")
+  private String username;
 
-    @Column(name = "DOJ")
-    private LocalDate dateOfJoining;
+  @Column(name = "PASSWORD_HASH")
+  private String passwordHash;
 
-    @Column(name = "TECH_STACK")
-    @Lob
-    private String techStack;
+  @Column(name = "DOJ")
+  private LocalDate dateOfJoining;
 
-    @Column(name = "LOCATION")
-    private String location;
+  @Column(name = "TECH_STACK")
+  @Lob
+  private String techStack;
 
-    @Column(name = "RESUME")
-    @Lob
-    @JsonIgnore
-    private byte[] resume;
+  @Column(name = "LOCATION")
+  private String location;
 
-  // One Employee can have Many Interview Details records
+  @Column(name = "RESUME")
+  @Lob
+  @JsonIgnore
+  private byte[] resume;
+
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @JsonIgnore
   private List<InterviewDetails> interviewDetailsList;

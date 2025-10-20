@@ -40,7 +40,6 @@ public class BANotificationListener {
     InterviewDetails details = event.getDetails();
     String action = event.getAction();
 
-    // --- AMC Interview Notification ---
     System.out.println("\n--- AMC INTERVIEW PORTAL NOTIFICATION ---");
     System.out.println("Employee: " + event.getEmployeeName() + " (ID: " + details.getEmployee().getEmpId() + ")");
     System.out.println("ALERT! Your interview schedule has been " + action + ".");
@@ -55,7 +54,6 @@ public class BANotificationListener {
     System.out.println("Date: " + details.getInterviewDate());
     System.out.println("Client: " + details.getClientName());
     System.out.println("New Result: " + details.getResult());
-    System.out.println("-----------------------------------------\n");
   }
 }
 
