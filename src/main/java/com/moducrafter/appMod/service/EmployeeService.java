@@ -1,5 +1,6 @@
 package com.moducrafter.appMod.service;
 
+import com.moducrafter.appMod.dto.BillingInformation;
 import com.moducrafter.appMod.dto.MappingDTO;
 import com.moducrafter.appMod.model.Employee;
 
@@ -15,4 +16,5 @@ public interface EmployeeService {
    Employee updateEmployeeMapping(MappingDTO dto);
   Employee updateBillableStatus(int empId, Boolean isBillable);
   List<Employee> findAMCsBySupervisorScope(int supervisorId);
+  BillingInformation fetchBillingInformation();
 }

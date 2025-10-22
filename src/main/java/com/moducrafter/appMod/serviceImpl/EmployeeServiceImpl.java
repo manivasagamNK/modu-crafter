@@ -1,5 +1,6 @@
 package com.moducrafter.appMod.serviceImpl;
 
+import com.moducrafter.appMod.dto.BillingInformation;
 import com.moducrafter.appMod.dto.MappingDTO;
 import com.moducrafter.appMod.events.BANotificationEvent;
 import com.moducrafter.appMod.events.MappingUpdatedEvent;
@@ -16,8 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @XSlf4j
@@ -124,6 +128,30 @@ public class EmployeeServiceImpl implements EmployeeService {
     return employeeRepository.findByRoleAndAmsName("AMC", scopeAmsName);
   }
 
+  @Override
+  public BillingInformation fetchBillingInformation() {
+    BillingInformation billingInfo = new BillingInformation();
+    int totalEmployees = Math.toIntExact(employeeRepository.count());
+    int billableCount = employeeRepository.countByIsBillableTrue();
+    List<Employee> unBillableEmps = employeeRepository.findAllByIsBillableFalse();
+
+    LocalDate today = LocalDate.now();
+
+    List<Employee> futureDates = unBillableEmps.stream()
+      .filter(e -> e.getLastBilledDate() != null && e.getLastBilledDate().isAfter(today))
+      .toList();
+
+    List<Employee> pastOrNullDates = unBillableEmps.stream()
+      .filter(e -> e.getLastBilledDate() == null || e.getLastBilledDate().isBefore(today))
+      .toList();
+
+    int nonBillableCount = employeeRepository.countByIsBillableFalse();
+    billingInfo.setTotalEmployees(totalEmployees);
+    billingInfo.setBillableEmployees(billableCount);
+    billingInfo.setNonBillableEmployees(nonBillableCount);
+    return billingInfo;
+  }
+
 
   private void createInitialInterviewEntry(Employee employee) {
     InterviewDetails initialEntry = new InterviewDetails();
@@ -146,4 +174,17 @@ public class EmployeeServiceImpl implements EmployeeService {
   private boolean isUnmapped(Employee emp) {
     return emp.getRole() == null && emp.getAmsName() == null && emp.getManagerName() == null;
   }
+
+  private String evaluateRisk(LocalDate joiningDate) {
+    long daysBetween = Math.abs(ChronoUnit.DAYS.between(joiningDate, LocalDate.now()));
+    if (daysBetween > 30) {
+      return "High Risk";
+    } else if (daysBetween >= 15) {
+      return "Medium Risk";
+    } else {
+      return "Low Risk";
+    }
+  }
 }
+
+

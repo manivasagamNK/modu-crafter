@@ -34,7 +34,7 @@ public class Employee {
   @Column(name = "DOJ")
   private LocalDate dateOfJoining;
 
-  @Column(name = "TECH_STACK")
+  @Column(name = "TECH_STACK", length = 1000)
   @Lob
   private String techStack;
 
@@ -60,10 +60,13 @@ public class Employee {
   private String role;
 
   @Column(name = "IS_BILLABLE")
-  private Boolean isBillable;
+  private Boolean isBillable = false;
 
   @Column(name = "INSERT_TS")
   private LocalDateTime updatedTime;
+
+  @Column(name = "LAST_BILLED_DATE")
+  private LocalDate lastBilledDate;
 
 
 }
