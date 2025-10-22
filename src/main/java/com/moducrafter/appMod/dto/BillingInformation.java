@@ -7,7 +7,7 @@ public class BillingInformation {
   private int totalEmployees;
   private int billableEmployees;
   private int nonBillableEmployees;
-  private int risk1Employees;
-  private int risk2Employees;
-  private int risk3Employees;
+  private int highRiskEmployees;
+  private int mediumRiskEmployees;
+  private int lowRiskEmployees;
 }
