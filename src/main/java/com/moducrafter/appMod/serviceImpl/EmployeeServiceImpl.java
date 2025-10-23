@@ -1,5 +1,7 @@
 package com.moducrafter.appMod.serviceImpl;
 
+import com.moducrafter.appMod.MyConstants;
+import com.moducrafter.appMod.dto.BillingInformation;
 import com.moducrafter.appMod.dto.MappingDTO;
 import com.moducrafter.appMod.events.BANotificationEvent;
 import com.moducrafter.appMod.events.MappingUpdatedEvent;
@@ -9,18 +11,21 @@ import com.moducrafter.appMod.repository.EmployeeRepository;
 import com.moducrafter.appMod.service.EmployeeService;
 import com.moducrafter.appMod.service.InterviewDetailsService;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.XSlf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
-@XSlf4j
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired
@@ -30,7 +35,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   private InterviewDetailsService interviewDetailsService;
   @Autowired
   private ApplicationEventPublisher eventPublisher;
-  private static final Logger log = LoggerFactory.getLogger(EmployeeServiceImpl.class);
+
 
   @Override
   public Employee getEmployee(int id){
@@ -124,6 +129,57 @@ public class EmployeeServiceImpl implements EmployeeService {
     return employeeRepository.findByRoleAndAmsName("AMC", scopeAmsName);
   }
 
+  @Override
+  public BillingInformation fetchBillingInformation() {
+    BillingInformation billingInfo = new BillingInformation();
+    int totalEmployees = Math.toIntExact(employeeRepository.count());
+    int billableCount = employeeRepository.countByIsBillableTrue();
+    List<Employee> unBillableEmps = employeeRepository.findAllByIsBillableFalse();
+
+    LocalDate today = LocalDate.now();
+//    TODO Not sure if this needs to be handled;
+//    List<Employee> futureDates = unBillableEmps.stream()
+//      .filter(e -> e.getLastBilledDate() != null && e.getLastBilledDate().isAfter(today))
+//      .toList();
+
+    List<Employee> empForRiskCalculation = unBillableEmps.stream()
+      .filter(e -> e.getLastBilledDate() == null || e.getLastBilledDate().isBefore(today))
+      .toList();
+
+    Map<String, Long> riskCounts = empForRiskCalculation.stream()
+      .map(emp -> {
+        LocalDate dateToEvaluate = emp.getLastBilledDate() != null
+          ? emp.getLastBilledDate()
+          : emp.getDateOfJoining();
+        return evaluateRisk(dateToEvaluate);
+      })
+      .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+    // Print the results
+    log.info("Risk Category Counts:");
+
+    riskCounts.forEach((risk, count) -> log.info("{}: {}", risk, count));
+
+
+    int nonBillableCount = employeeRepository.countByIsBillableFalse();
+    billingInfo.setHighRiskEmployees(riskCounts.getOrDefault(MyConstants.highRisk, 0L).intValue());
+    billingInfo.setMediumRiskEmployees(riskCounts.getOrDefault(MyConstants.mediumRisk, 0L).intValue());
+    billingInfo.setLowRiskEmployees(riskCounts.getOrDefault(MyConstants.lowRisk, 0L).intValue());
+    billingInfo.setTotalEmployees(totalEmployees);
+    billingInfo.setBillableEmployees(billableCount);
+    billingInfo.setNonBillableEmployees(nonBillableCount);
+    return billingInfo;
+  }
+
+  @Override
+  public List<Employee> findAmcByAms(String amsName) {
+    List<Employee> amcList = employeeRepository.findAllByAmsName(amsName);
+    if (!amcList.isEmpty()) {
+       amcList.forEach(employee -> employee.setResume(null));
+    }
+    return amcList;
+  }
+
 
   private void createInitialInterviewEntry(Employee employee) {
     InterviewDetails initialEntry = new InterviewDetails();
@@ -146,4 +202,17 @@ public class EmployeeServiceImpl implements EmployeeService {
   private boolean isUnmapped(Employee emp) {
     return emp.getRole() == null && emp.getAmsName() == null && emp.getManagerName() == null;
   }
+
+  private String evaluateRisk(LocalDate joiningDate) {
+    long daysBetween = Math.abs(ChronoUnit.DAYS.between(joiningDate, LocalDate.now()));
+    if (daysBetween > 60) {
+      return MyConstants.highRisk;
+    } else if (daysBetween >= 30) {
+      return MyConstants.mediumRisk;
+    } else {
+      return MyConstants.lowRisk;
+    }
+  }
 }
+
+

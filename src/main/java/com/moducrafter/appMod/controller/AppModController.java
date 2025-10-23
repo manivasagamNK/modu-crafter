@@ -1,6 +1,7 @@
 package com.moducrafter.appMod.controller;
 
 
+import com.moducrafter.appMod.dto.BillingInformation;
 import com.moducrafter.appMod.dto.MappingDTO;
 import com.moducrafter.appMod.model.Employee;
 import com.moducrafter.appMod.repository.EmployeeRepository;
@@ -11,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -136,6 +138,18 @@ public class AppModController {
     Employee updatedEmployee = employeeService.updateBillableStatus(empId, isBillable);
     return ResponseEntity.ok(updatedEmployee);
   }
+
+  @GetMapping("/ba/getBillingInfo")
+  public ResponseEntity<BillingInformation> getBillingInfo(){
+    return ResponseEntity.ok(employeeService.fetchBillingInformation());
+
+  }
+
+  @GetMapping("/amc/getAmcByAms/{amsName}")
+    public ResponseEntity<List<Employee>> getAmcByAms(@PathVariable String amsName){
+      List<Employee> amcList = employeeService.findAmcByAms(amsName);
+      return ResponseEntity.ok(amcList);
+    }
 
 
 }
