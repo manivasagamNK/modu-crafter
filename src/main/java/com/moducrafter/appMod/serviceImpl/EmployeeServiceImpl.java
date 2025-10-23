@@ -171,6 +171,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     return billingInfo;
   }
 
+  @Override
+  public List<Employee> findAmcByAms(String amsName) {
+    List<Employee> amcList = employeeRepository.findAllByAmsName(amsName);
+    if (!amcList.isEmpty()) {
+       amcList.forEach(employee -> employee.setResume(null));
+    }
+    return amcList;
+  }
+
 
   private void createInitialInterviewEntry(Employee employee) {
     InterviewDetails initialEntry = new InterviewDetails();

@@ -145,5 +145,11 @@ public class AppModController {
 
   }
 
+  @GetMapping("/amc/getAmcByAms/{amsName}")
+    public ResponseEntity<List<Employee>> getAmcByAms(@PathVariable String amsName){
+      List<Employee> amcList = employeeService.findAmcByAms(amsName);
+      return ResponseEntity.ok(amcList);
+    }
+
 
 }

@@ -20,6 +20,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
   List<Employee> findAllByIsBillableFalse();
   int countByIsBillableTrue();
   int countByIsBillableFalse();
-
+  List<Employee> findAllByAmsName(String amsName);
 
 }

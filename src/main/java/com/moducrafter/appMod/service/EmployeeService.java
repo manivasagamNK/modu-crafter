@@ -17,4 +17,5 @@ public interface EmployeeService {
   Employee updateBillableStatus(int empId, Boolean isBillable);
   List<Employee> findAMCsBySupervisorScope(int supervisorId);
   BillingInformation fetchBillingInformation();
+  List<Employee> findAmcByAms(String amsName);
 }
