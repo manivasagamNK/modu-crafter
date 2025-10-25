@@ -1,0 +1,17 @@
+    <!-- dialog.component.html -->
+    <h2 mat-dialog-title>Employee <span class="span-col">{{data.empName}}</span></h2>
+    <mat-dialog-content>
+      <div>{{data.empId}}</div><br>
+      <div>{{data.empName}}</div><br>
+      <div>{{data.resume}}<input type="file" #fileInput (change)="onFileSelected($event)"></div><br>
+      <div>{{data.feedback}}</div><br>
+      <div>{{data.ams}}</div><br>
+      <div>{{data.udamayTrack}}</div><br>           
+      
+      <!-- <button mat-raised-button color="primary" (click)="fileInput.click()">Select File</button>
+      <div *ngIf="selectedFile">{{ selectedFile.name }} selected</div> -->
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="accent" [disabled]="!selectedFile" (click)="onUpload()">Upload</button>
+    </mat-dialog-actions>

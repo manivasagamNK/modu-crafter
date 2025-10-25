@@ -38,6 +38,7 @@
           </div>
           <div class="user-actions">
             <i class="icon-bell"></i>
+            <span class="count" (click)="openNotification()">2</span>
             <span class="sign-out">Sign out</span>
           </div>
         </header>
@@ -48,16 +49,19 @@
             <div class="widget new-joiner-details">
               <h3>New Joiner Details</h3>
               <div class="table-container">
+                <div class="table-controls">
+                  <input type="text" placeholder="Search new joiners..." [(ngModel)]="newJoinerSearch"  class="search-table" />
+                </div>
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Location</th>
-                      <th>DOJ</th>
+                      <th (click)="toggleNewJoinerSort('name')">Name</th>
+                      <th (click)="toggleNewJoinerSort('location')">Location</th>
+                      <th (click)="toggleNewJoinerSort('doj')">DOJ</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let joiner of newJoiners()">
+                    <tr *ngFor="let joiner of paginatedNewJoiners()">
                       <td>{{ joiner.name }}</td>
                       <td>{{ joiner.location }}</td>
                       <td>{{ joiner.doj }}</td>
@@ -68,6 +72,21 @@
               <div class="table-actions">
                 <button class="action-button export-btn">Export</button>
                 <a href="#" class="see-more">See More</a>
+              </div>
+              <div class="pagination-controls">
+                <button (click)="prevNewJoinerPage()" [disabled]="newJoinerPage() === 0">Prev</button>
+                <ng-container *ngFor="let p of [].constructor(newJoinerTotalPages()); let i = index">
+                  <button (click)="goToNewJoinerPage(i)" [class.active]="newJoinerPage() === i">{{ i + 1 }}</button>
+                </ng-container>
+                <button (click)="nextNewJoinerPage()" [disabled]="newJoinerPage() >= newJoinerTotalPages() - 1">Next</button>
+                <label>
+                  Page size:
+                  <select #ps (change)="setNewJoinerPageSize(+ps.value)" [value]="newJoinerPageSize()">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                  </select>
+                </label>
               </div>
             </div>
 
@@ -87,7 +106,7 @@
             </div>
           </section>
           
-          <section class="widget recent-interviews">
+          <!-- <section class="widget recent-interviews">
             <header class="section-header">
               <h3>Recent AMC Interview Results</h3>
               <div class="date-picker-container">
@@ -95,60 +114,92 @@
               </div>
             </header>
             <div class="table-container">
+              <div class="table-controls">
+                <input type="text" placeholder="Search interviews..." [(ngModel)]="interviewSearch" class="search-table"/>
+              </div>
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    <th>Tech</th>
-                    <th>Feedback</th>
+                    <th (click)="toggleInterviewSort('name')">Name</th>
+                    <th (click)="toggleInterviewSort('date')">Date</th>
+                    <th (click)="toggleInterviewSort('category')">Tech</th>
+                    <th (click)="toggleInterviewSort('feedback')">Feedback</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr *ngFor="let result of filteredInterviewResults()">
+                  <tbody>
+                     @for(result of paginatedInterviewResults();track result.name){ 
+                    <tr>
                     <td>
                       {{ result.name }}
                     </td>
                     <td>{{ result.date }}</td>
                     <td>{{ result.category }}</td>
                     <td>{{ result.feedback }}</td>
-                  </tr>
+                  </tr>}
                 </tbody>
               </table>
+              <div class="pagination-controls">
+                <button (click)="prevInterviewPage()" [disabled]="interviewPage() === 0">Prev</button>
+                <ng-container *ngFor="let p of [].constructor(interviewTotalPages()); let i = index">
+                  <button (click)="goToInterviewPage(i)" [class.active]="interviewPage() === i">{{ i + 1 }}</button>
+                </ng-container>
+                <button (click)="nextInterviewPage()" [disabled]="interviewPage() >= interviewTotalPages() - 1">Next</button>
+                <label>
+                  Page size:
+                  <select #ips (change)="setInterviewPageSize(+ips.value)" [value]="interviewPageSize()">
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                  </select>
+                </label>
+              </div>
             </div>
-          </section>
+          </section> -->
         }
 
         <!-- AMC View -->
         @if (currentView() === 'amc') {
           <section class="widget amc-table-section">
         
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Emp ID</th>
-                            <th>Emp Name</th>
-                            <th>Resume</th>
-                            <th>Recent Interview Feedback</th>
-                            <th>AMS</th>
-                            <th>UdamayTrack</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (item of amcData(); track item.empId) {
-                            <tr (click)="onRowClick(item)">
-                                <td>{{ item.empId }}</td>
-                                <td>{{ item.empName }}</td>
-                                <td>{{ item.resume }}</td>
-                                <td>{{ item.feedback }}</td>
-                                <td>{{ item.ams }}</td>
-                                <td>{{ item.udamayTrack }}</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+          <div class="table-container">
+        <div class="table-controls">
+        <input type="text" placeholder="Search AMC..." [(ngModel)]="amcSearch"  class="search-table"/>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th (click)="toggleAmcSort('empId')">Emp ID</th>
+              <th (click)="toggleAmcSort('empName')">Emp Name</th>
+              <th (click)="toggleAmcSort('resume')">Resume</th>
+              <th (click)="toggleAmcSort('feedback')">Recent Interview Feedback</th>
+              <th (click)="toggleAmcSort('ams')">AMS</th>
+              <th (click)="toggleAmcSort('udamayTrack')">UdamayTrack</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of paginatedAmcData(); track item.empId) {
+              <tr (click)="onRowClick(item)">
+                <td>{{ item.empId }}</td>
+                <td>{{ item.empName }}</td>
+                <td>{{ item.resume }}</td>
+                <td>{{ item.feedback }}</td>
+                <td>{{ item.ams }}</td>
+                <td>{{ item.udamayTrack }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="pagination-controls">
+          <button (click)="prevAmcPage()" [disabled]="amcPage() === 0">Prev</button>
+          <ng-container *ngFor="let p of [].constructor(amcTotalPages()); let i = index">
+            <button (click)="goToAmcPage(i)" [class.active]="amcPage() === i">{{ i + 1 }}</button>
+          </ng-container>
+          <button (click)="nextAmcPage()" [disabled]="amcPage() >= amcTotalPages() - 1">Next</button>
+          <label>Page size:
+            <select #aps (change)="setAmcPageSize(+aps.value)" [value]="amcPageSize()"><option value="5">5</option><option value="10">10</option></select>
+          </label>
+        </div>
+      </div>
             <div class="table-actions">
               <button class="action-button export-btn">Export</button>
               <a href="#" class="see-more">See More</a>
@@ -160,28 +211,41 @@
         @if (currentView() === 'ams') {
           <section class="widget amc-table-section">
             <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>AMS E.id</th>
-                            <th>AMS Name</th>
-                            <th>Assigned AMC Count</th>
-                            <th>Tech Stack</th>
-                            <th>Manager Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (item of amsData(); track item.amsEid) {
-                            <tr (click)="onRowClick(item)">
-                                <td>{{ item.amsEid }}</td>
-                                <td>{{ item.amsName }}</td>
-                                <td>{{ item.assignedAmcCount }}</td>
-                                <td>{{ item.techStack }}</td>
-                                <td>{{ item.managerName }}</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+              <div class="table-controls">
+                <input type="text" placeholder="Search AMS..." [(ngModel)]="amsSearch"  class="search-table"/>
+              </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th (click)="toggleAmsSort('amsEid')">AMS E.id</th>
+              <th (click)="toggleAmsSort('amsName')">AMS Name</th>
+              <th (click)="toggleAmsSort('assignedAmcCount')">Assigned AMC Count</th>
+              <th (click)="toggleAmsSort('techStack')">Tech Stack</th>
+              <th (click)="toggleAmsSort('managerName')">Manager Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of paginatedAmsData(); track item.amsEid) {
+              <tr (click)="onRowClick(item)">
+                <td>{{ item.amsEid }}</td>
+                <td>{{ item.amsName }}</td>
+                <td>{{ item.assignedAmcCount }}</td>
+                <td>{{ item.techStack }}</td>
+                <td>{{ item.managerName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="pagination-controls">
+          <button (click)="prevAmsPage()" [disabled]="amsPage() === 0">Prev</button>
+          <ng-container *ngFor="let p of [].constructor(amsTotalPages()); let i = index">
+          <button (click)="goToAmsPage(i)" [class.active]="amsPage() === i">{{ i + 1 }}</button>
+          </ng-container>
+          <button (click)="nextAmsPage()" [disabled]="amsPage() >= amsTotalPages() - 1">Next</button>
+          <label>Page size:
+          <select #amps (change)="setAmsPageSize(+amps.value)" [value]="amsPageSize()"><option value="5">5</option><option value="10">10</option></select>
+          </label>
+        </div>
             </div>
             <div class="table-actions">
               <button class="action-button export-btn">Export</button>
@@ -195,33 +259,47 @@
             <section class="widget recent-interviews">
                 <header class="section-header">
                   <h3>Recent AMC Interview Results</h3>
-                  <div class="date-picker-container">
-                    <input type="date" [(ngModel)]="startDate" (change)="filterByDate()">
+                  <!-- <div class="date-picker-container">
+                    <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); filterByDate()">
                     <span>-</span>
-                    <input type="date" [(ngModel)]="endDate" (change)="filterByDate()">
-                  </div>
+                    <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event); filterByDate()">
+                  </div> -->
                 </header>
                 <div class="table-container">
+                  <div class="table-controls">
+                    <input type="text" placeholder="Search interviews..." [(ngModel)]="interviewSearch"  class="search-table"/>
+                  </div>
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Date</th>
-                        <th>Tech</th>
-                        <th>Feedback</th>
+                        <th (click)="toggleInterviewSort('name')">Employee Name</th>
+                        <th (click)="toggleInterviewSort('client')">Client Name</th>
+                        <th (click)="toggleInterviewSort('date')">Interview Date</th>
+                        <th (click)="toggleInterviewSort('result')">Result</th>
+                        <th (click)="toggleInterviewSort('feedback')">Feedback</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let result of filteredInterviewResults()">
-                        <td>
-                          {{ result.name }}
-                        </td>
+                      @for(result of paginatedInterviewDetails();track result.name){                      
+                      <tr (click)="viewDetails(result)">
+                        <td>{{ result.name }}</td>
+                        <td>{{ result.client }}</td>
                         <td>{{ result.date }}</td>
-                        <td>{{ result.category }}</td>
+                        <td>{{ result.result }}</td>
                         <td>{{ result.feedback }}</td>
-                      </tr>
+                      </tr>}
                     </tbody>
                   </table>
+                  <div class="pagination-controls">
+                    <button (click)="prevInterviewDetailsPage()" [disabled]="interviewDetailsPage() === 0">Prev</button>
+                    <ng-container *ngFor="let p of [].constructor(interviewDetailsTotalPages()); let i = index">
+                      <button (click)="goToInterviewDetailsPage(i)" [class.active]="interviewDetailsPage() === i">{{ i + 1 }}</button>
+                    </ng-container>
+                    <button (click)="nextInterviewDetailsPage()" [disabled]="interviewDetailsPage() >= interviewDetailsTotalPages() - 1">Next</button>
+                    <label>Page size:
+                      <select #idps (change)="setInterviewDetailsPageSize(+idps.value)" [value]="interviewDetailsPageSize()"><option value="10">10</option><option value="20">20</option></select>
+                    </label>
+                  </div>
                 </div>
                 <div class="table-actions">
               <button class="action-button export-btn">Export</button>
