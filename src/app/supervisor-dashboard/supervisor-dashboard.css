@@ -1,0 +1,251 @@
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+    .supervisor-dashboard-container {
+      display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+    }
+
+    .content-wrapper {
+     display: flex;
+  width: 100%;
+  height: 100vh; /* Set a fixed height */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  overflow: hidden; /* This is the key change */
+    }
+
+    .sidebar {
+     width: 200px;
+  background-color: #1a1a1a;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-right: 1px solid #333;
+  overflow-y: auto; /* Allow scrolling for the sidebar if needed */
+    }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #9c27b0;
+      margin-bottom: 0;
+      text-align: center;
+    }
+
+    .nav-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      /* Add controlled space between the title and the first nav item */
+    margin-top: 1rem;
+    }
+.nav-list li {
+  /* This class is now redundant as we're using Tailwind's 'space-y-4' on the parent, but keep it if you prefer manual control */
+  margin-bottom: 1rem;
+}
+    .nav-button, .nav-button-active {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+    }
+
+.nav-button {
+  background-color: transparent;
+  color: #a0a0a0;
+  /* Remove nested & operator if not using a preprocessor like SCSS */
+}
+
+.nav-button:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+    .nav-button-active {
+      background: #9c27b0;
+      color: white;
+      box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+    }
+
+    .sign-out-button {
+      background-color: transparent;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      margin-top: auto;
+      cursor: pointer;
+      &:hover {
+        background-color: #555;
+      }
+    }
+
+    .main-content {
+      flex-grow: 1;
+      background-color: #612731;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .header {
+      background-color: #612731;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #333;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .header-subtitle {
+      font-size: 1rem;
+      color: #a0a0a0;
+      margin-top: 0.5rem;
+    }
+
+    .content-card {
+      background-color: #1a1a1a;
+      padding: 1rem;
+      border-radius: 1rem;
+    }
+
+    .card {
+      background-color: #212121;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background-color: #2a2a2a;
+    }
+
+    .data-table th, .data-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+
+    .data-table th {
+      background-color: #333;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tbody tr:hover {
+      background-color: #424242;
+    }
+
+    .export-button {
+      background-color: #424242;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: 1px solid #666;
+      cursor: pointer;
+      &:hover {
+        background-color: #555;
+      }
+    }
+
+    .seemore-link {
+      color: #9c27b0;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .notification-icon {
+          display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-color: currentColor;
+      /* Use current text color for icons */
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+    }
+    .notification-icon {
+      mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>');
+    }
+    .sidebar {
+  /* This ensures the sidebar takes up the full height of the container */
+  height: 100vh;
+  /* You can add a background color for clarity */
+  background-color: #2c3e50;
+  /* Flexbox is great for arranging content vertically */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  width: 250px; /* Adjust as needed */
+}
+
+.sidebar-title {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  /* This is the key part to remove the space below the title */
+  margin: 0;
+  padding: 0;
+  /* Add padding to the bottom to create a small gap if desired */
+  padding-bottom: 20px;
+}
+
+.nav-list {
+  list-style: none;
+  /* Removes default bullet points from the list */
+  padding: 0;
+  /* This removes any default padding on the ul */
+  margin: 0;
+  /* Removes any default margin on the ul */
+}
+
+.nav-list li {
+  margin-bottom: 10px;
+  /* Adds space between the list items */
+}
+
+.nav-button {
+  background-color: transparent;
+  color: #bdc3c7;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button:hover,
+.nav-button-active {
+  background-color: #34495e;
+  color: #fff;
+}

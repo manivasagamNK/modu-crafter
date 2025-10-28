@@ -1,0 +1,36 @@
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+.menu {
+    background-color:lightblue;
+}
+
+.title {
+    color:red;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 30px;font-weight: bold;text-align: center;
+    padding-left: 40%;
+}
+
+.example-form-field {
+  width: 200px;
+}
+
+.search {
+    padding-left: 10%;
+}
+
+.avatar {
+  border-radius: 50%;
+  height: 40px; /* or any size you want */
+  width: 40px;  /* or any size you want */
+  border-radius: 50%;
+  overflow: hidden; /* This is crucial to keep the image within the circle */
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
