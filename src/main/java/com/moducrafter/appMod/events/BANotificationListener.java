@@ -1,6 +1,8 @@
 package com.moducrafter.appMod.events;
 
 import com.moducrafter.appMod.model.InterviewDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,19 @@ public class BANotificationListener {
     System.out.println("ALERT! New Employee Mapping Required");
     System.out.println("Employee: " + event.getName() + " (ID: " + event.getEmpId() + ")");
     System.out.println("ACTION: BA should assign Role/AMS/Manager for new employee.");
+  }
+  private static final Logger log = LoggerFactory.getLogger(BANotificationListener.class);
+
+  @EventListener
+  public void handleBANotification(BANotificationEvent event) {
+    // In a real application, this would:
+    // 1. Send an email to the BA.
+    // 2. Push a message to a WebSocket (STOMP) for a real-time notification badge on the UI.
+    // 3. Log the event to a dedicated Notification table.
+
+    log.info("🔥 BA Notification Fired: New Employee Profile Added!");
+    log.info("Employee ID: {}, Name: {}", event.getEmpId(), event.getName());
+    log.info("Action Required: Map Role, AMS Name, Manager Name, and Billable Status.");
   }
   @Async
   @EventListener

@@ -99,6 +99,7 @@
            display: inline-block;
       width: 20px;
       height: 20px;
+      position: relative;
       background-color: currentColor;
       /* Use current text color for icons */
       mask-size: contain;
@@ -296,3 +297,37 @@
     .icon-bell {
       mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>');
     }
+
+    .count {     
+     background-color: red;
+     font-size: 10px;
+     border-radius: 50%;
+     position: relative;
+     bottom:10px;
+     right: 20px;     
+      width: 20px;       /* Set equal width */
+      height: 20px;      /* Set equal height */
+      display: flex;     /* Center the text */
+      align-items: center;
+      justify-content: center;
+      color: white;      /* Optional: for better visibility */
+
+    }
+
+    .search-table {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      height: 30px;
+      width: 250px;
+    }
+
+    .count:hover {
+      background: lightcoral;
+    }
+
+    .icon-bell:hover {
+      background: red; 
+    }
+    

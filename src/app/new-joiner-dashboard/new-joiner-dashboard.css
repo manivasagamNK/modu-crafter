@@ -304,24 +304,7 @@
       text-align: right;
     }
 
-    /* Udemy Details */
-    .udemy-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .udemy-chart {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 300px;
-    }
-
-    .udemy-table {
-      min-height: 300px;
-    }
+  
 
     /* Chart styles, reused from previous examples */
     .chart-container {
@@ -393,7 +376,11 @@
       max-width: 800px;
       margin: auto;
     }
+.udemy-section{
+     max-width: 800px;
+      margin: auto;
 
+}
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .dashboard-container {
@@ -413,4 +400,20 @@
       .udemy-section {
         grid-template-columns: 1fr;
       }
+ .other-skill-group textarea {
+  width: 100%; 
+    padding: 10px;
+    
+    /* Styles to match the dark form theme */
+    border: 1px solid #555;
+    background-color: #333; /* Dark background */
+    color: #fff; /* White text */
+    
+    box-sizing: border-box; 
+    
+    resize: none; 
+    
+    font-family: inherit; 
+    line-height: 1.5;
+}
     }

@@ -1,6 +1,7 @@
 package com.moducrafter.appMod.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ public class Employee {
 
   @Column(name = "NAME")
   private String name;
+
   @Column(name = "USERNAME")
   private String username;
 
@@ -65,5 +67,8 @@ public class Employee {
   @Column(name = "INSERT_TS")
   private LocalDateTime updatedTime;
 
+  @Transient
+  @JsonProperty("resumeUrl")
+  private String resumeUrl;
 
 }

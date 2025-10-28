@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AIUdemyServiceImpl implements AIUdemyService {
@@ -198,6 +200,40 @@ public class AIUdemyServiceImpl implements AIUdemyService {
     return List.of();
   }
 
+  @Override
+  public String getRelevantText(String fullResumeText) {
+    if (fullResumeText == null || fullResumeText.isEmpty()) {
+      return "";
+    }
+
+    // Define keywords that typically mark the start of relevant sections.
+    // Common sections: Skills, Experience, Education, Projects.
+    String regex = "(?i)(skills|experience|summary|projects|education|tech stack)(.*)";
+
+    // Flags: (?s) enables DOTALL mode, so '.' matches newlines as well.
+    Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+    Matcher matcher = pattern.matcher(fullResumeText);
+
+    StringBuilder relevantTextBuilder = new StringBuilder();
+
+    // Find all matches based on the section headers
+    while (matcher.find()) {
+      // Append the entire section content (header + content)
+      // Limit to the first 5000 characters to prevent buffer overflow/excessive processing, if needed.
+      String section = matcher.group(0);
+      relevantTextBuilder.append(section).append("\n\n");
+    }
+
+    String relevantText = relevantTextBuilder.toString();
+
+    // If the filtered text is very short (e.g., less than 50 chars), return the original
+    // full text to ensure we don't accidentally skip a resume that doesn't use formal headers.
+    if (relevantText.length() < 50) {
+      return fullResumeText;
+    }
+
+    return relevantText;
+  }
   private String buildExtractionPrompt(String resumeText) {
     return """
       Analyze the following resume text. Your task is to **focus primarily on the 'Technologies' and 'Professional Overview' sections** to identify technical skills.

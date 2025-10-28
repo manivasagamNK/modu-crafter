@@ -26,6 +26,7 @@ public class InterviewDetails {
     @JoinColumn(name = "EMP_ID", referencedColumnName = "EMP_ID",nullable = false)
     @JsonIgnore
     private Employee employee;
+    @Lob
     @Column(name = "TECHNOLOGY_STACK")
     private String technologyStack;
     @Column(name = "INTERVIEW_DATE")

@@ -8,23 +8,32 @@ import com.moducrafter.appMod.service.AIUdemyService;
 import com.moducrafter.appMod.service.EmployeeService;
 import com.moducrafter.appMod.service.InterviewDetailsService;
 import jakarta.persistence.EntityNotFoundException;
+import com.moducrafter.appMod.model.ResumeActivity; // NEW
 import org.slf4j.Logger;
+import org.springframework.core.io.Resource; // NEW
+import org.springframework.core.io.UrlResource; // NEW
+import org.springframework.http.HttpHeaders; // NEW
+import org.springframework.http.MediaType; // NEWimport org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AppModController {
   private static final Logger log = LoggerFactory.getLogger(AppModController.class);
   @Autowired
@@ -49,37 +58,95 @@ public class AppModController {
   }
 
 
-  @PostMapping(value = "/employee/addProfile", consumes = {"multipart/form-data"})
-  public ResponseEntity<Employee> addEmployee(@Validated @RequestPart("emp") Employee emp,
-                                              @RequestPart("file") MultipartFile file) throws IOException {
+  @PostMapping(value = "/employee/addProfile")
+  public ResponseEntity<?> addEmployee(@Validated @RequestPart("emp") Employee emp,@RequestPart("file") MultipartFile file) throws IOException {
 
     try {
-      emp.setResume(file.getBytes());
+      emp.setUpdatedTime(LocalDateTime.now());
+      emp.setUsername(emp.getName()+emp.getEmpId());
+      emp.setPasswordHash(emp.getName()+emp.getEmpId());
+      Employee savedEmp = employeeService.addProfile(emp, file);
+      return ResponseEntity.ok(savedEmp);
 
+    } catch (Exception e) {
+      log.error("Failed to process employee profile addition.", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(null);
+    }
+  }
+  @GetMapping("/profile/{empId}")
+  public ResponseEntity<Employee> getEmployeeProfile(@PathVariable Integer empId) {
+
+    Optional<Employee> employee = employeeRepository.findById(empId);
+
+    if (employee.isPresent()) {
+      return ResponseEntity.ok(employee.get()); // Returns 200 OK
+    } else {
+      // Returns 404 Not Found if the employee is not found
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+  }
+  // --- NEW DOWNLOAD/VIEW RESUME ENDPOINT (for BA/AMS pages) ---
+  @GetMapping("/employee/resume/{empId}")
+  public ResponseEntity<Resource> downloadResume(@PathVariable Integer empId) {
+
+    Optional<ResumeActivity> resumeOpt = employeeService.getLatestResumeActivity(empId);
+
+    if (resumeOpt.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    ResumeActivity resume = resumeOpt.get();
+    Path filePath = Paths.get(resume.getResumePath()).normalize();
+
+    try {
+      Resource resource = new UrlResource(filePath.toUri());
+
+      if (resource.exists() || resource.isReadable()) {
+        return ResponseEntity.ok()
+          // Set the dynamic content type (PDF, DOCX)
+          .contentType(MediaType.parseMediaType(resume.getContentType()))
+          // Force the browser to display inline (instead of downloading)
+          .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resume.getFileName() + "\"")
+          .body(resource);
+      } else {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(null);
+      }
+    } catch (MalformedURLException ex) {
+      log.error("File path is invalid: {}", resume.getResumePath(), ex);
+      return ResponseEntity.internalServerError().build();
+    }
+  }
+  @PostMapping (value = "employee/extractSkills", consumes = {"multipart/form-data"})
+  public ResponseEntity<Map<String, String>> extractSkillsFromResume(@RequestPart("file") MultipartFile file) {
+
+    Map<String, String> response = new HashMap<>();
+
+    try {
+      // 1. Extract raw text from the file
       Map<String, Object> extractedData = aiUdemyService.extractCourseDetails(
         file.getInputStream(),
         file.getOriginalFilename()
       );
       String rawExtractedText = (String) extractedData.getOrDefault("content", "");
-
+      String filteredText = aiUdemyService.getRelevantText(rawExtractedText);
       List<String> extractedSkillsList = aiUdemyService.extractSkills(rawExtractedText);
-
       String extractedSkills = String.join(", ", extractedSkillsList);
 
       if (!extractedSkills.isEmpty()) {
-        emp.setTechStack(extractedSkills);
-        log.info("Successfully extracted {} skills.", extractedSkillsList.size());
+        response.put("techStack", extractedSkills);
       } else {
-        log.warn("No technical skills were extracted for employee: {}", emp.getName());
+        response.put("techStack", "");
       }
-      emp.setUpdatedTime(LocalDateTime.now());
-      Employee savedEmp = employeeService.addProfile(emp);
-      return ResponseEntity.ok(savedEmp);
+
+      return ResponseEntity.ok(response);
 
     } catch (Exception e) {
-      log.error("Failed to process employee profile or extract skills.", e);
+      // log.error("Failed to extract skills from resume.", e);
+      response.put("error", "Extraction failed: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(null);
+        .body(response);
     }
   }
   @GetMapping("/employee/mapping/new-joiners")
@@ -90,19 +157,27 @@ public class AppModController {
   // Get employees assigned to the AMC Role
   @GetMapping("/employee/role/amc")
   public ResponseEntity<List<Employee>> getAMCEmployees() {
-    return ResponseEntity.ok(employeeRepository.findByRole("AMC"));
+    List<Employee>list=employeeRepository.findByRole("amc");
+    list.forEach(emp -> {
+      Optional<ResumeActivity>resumeOpt= employeeService.getLatestResumeActivity(emp.getEmpId());
+      resumeOpt.ifPresent(resume->
+        emp.setResumeUrl("/employee/resume"+emp.getEmpId())
+    );
+    });
+    return ResponseEntity.ok(list);
   }
 
   // Get employees assigned to the AMS Role
   @GetMapping("/employee/role/ams")
   public ResponseEntity<List<Employee>> getAMSEmployees() {
-    return ResponseEntity.ok(employeeRepository.findByRole("AMS"));
+    List<Employee>list=employeeRepository.findByRole("ams");
+    return ResponseEntity.ok(employeeRepository.findByRole("ams"));
   }
 
   @PostMapping("/employee/update")
-  public ResponseEntity<Employee> updateEmployeeMapping(@RequestBody MappingDTO mappingData) {
-    Employee updatedEmp = employeeService.updateEmployeeMapping(mappingData);
-    return ResponseEntity.ok(updatedEmp);
+  public ResponseEntity<String> updateEmployeeMapping(@RequestBody MappingDTO mappingData) {
+    employeeService.updateEmployeeMapping(mappingData);
+    return ResponseEntity.ok("Mapping updated successfully");
   }
 
   @GetMapping("/amc-details")
