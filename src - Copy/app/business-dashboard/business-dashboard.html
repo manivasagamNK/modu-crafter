@@ -61,7 +61,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let joiner of paginatedNewJoiners()" (click)="onRowClick1(joiner)">
+                    <tr *ngFor="let joiner of paginatedNewJoiners()">
                       <td>{{ joiner.name }}</td>
                       <td>{{ joiner.location }}</td>
                       <td>{{ joiner.doj }}</td>
@@ -106,7 +106,7 @@
             </div>
           </section>
           
-          <!-- <section class="widget recent-interviews">
+           <section class="widget recent-interviews">
             <header class="section-header">
               <h3>Recent AMC Interview Results</h3>
               <div class="date-picker-container">
@@ -114,15 +114,12 @@
               </div>
             </header>
             <div class="table-container">
-              <div class="table-controls">
-                <input type="text" placeholder="Search interviews..." [(ngModel)]="interviewSearch" class="search-table"/>
-              </div>
               <table class="data-table">
                 <thead>
                   <tr>
                     <th (click)="toggleInterviewSort('name')">Name</th>
                     <th (click)="toggleInterviewSort('date')">Date</th>
-                    <th (click)="toggleInterviewSort('category')">Tech</th>
+                    <th (click)="toggleInterviewSort('result')">Result</th>
                     <th (click)="toggleInterviewSort('feedback')">Feedback</th>
                   </tr>
                 </thead>
@@ -133,7 +130,7 @@
                       {{ result.name }}
                     </td>
                     <td>{{ result.date }}</td>
-                    <td>{{ result.category }}</td>
+                    <td>{{ result.result }}</td>
                     <td>{{ result.feedback }}</td>
                   </tr>}
                 </tbody>
@@ -154,7 +151,7 @@
                 </label>
               </div>
             </div>
-          </section> -->
+          </section> 
         }
 
         <!-- AMC View -->
@@ -170,24 +167,25 @@
             <tr>
               <th (click)="toggleAmcSort('empId')">Emp ID</th>
               <th (click)="toggleAmcSort('empName')">Emp Name</th>
-              <th (click)="toggleAmcSort('resume')">Resume</th>
-              <th (click)="toggleAmcSort('feedback')">Recent Interview Feedback</th>
               <th (click)="toggleAmcSort('ams')">AMS</th>
-              <th (click)="toggleAmcSort('udamayTrack')">UdamayTrack</th>
+              <th (click)="toggleAmcSort('billable')">Billable </th>
+              <th (click)="toggleAmcSort('risktype')">Risk category</th>
+              <th (click)="toggleAmcSort('resume')">Resume</th>
             </tr>
           </thead>
-          <tbody>
-            @for (item of paginatedAmcData(); track item.empId) {
-              <tr>
-                <td>{{ item.empId }}</td>
-                <td>{{ item.empName }}</td>
-                <td><a (click)="downloadTextFile()">{{ item.resume }}</a></td>
-                <td>{{ item.feedback }}</td>
-                <td>{{ item.ams }}</td>
-                <td>{{ item.udamayTrack }}</td>
-              </tr>
-            }
-          </tbody>
+           <tbody>
+    <tr *ngFor="let emp of amcData()">
+      <td>{{ emp.empId }}</td>
+      <td>{{ emp.empName }}</td>
+      <td>{{ emp.ams }}</td>
+      <td>{{ emp.billable }}</td>
+      <td>{{ emp.riskCategory }}</td>
+      <td>
+        <button *ngIf="emp.resume" (click)="downloadResume(emp)">Download</button>
+        <span *ngIf="!emp.resume">N/A</span>
+      </td>
+    </tr>
+  </tbody>
         </table>
         <div class="pagination-controls">
           <button (click)="prevAmcPage()" [disabled]="amcPage() === 0">Prev</button>
@@ -202,7 +200,6 @@
       </div>
             <div class="table-actions">
               <button class="action-button export-btn">Export</button>
-              <a href="#" class="see-more">See More</a>
             </div>
           </section>
         }
@@ -217,10 +214,9 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th (click)="toggleAmsSort('amsEid')">AMS E.id</th>
-              <th (click)="toggleAmsSort('amsName')">AMS Name</th>
-              <th (click)="toggleAmsSort('assignedAmcCount')">Assigned AMC Count</th>
-              <!-- <th (click)="toggleAmsSort('techStack')">Tech Stack</th> -->
+              <th (click)="toggleAmsSort('amsEid')">AMS id</th>
+              <th (click)="toggleAmsSort('amsName')">Name</th>
+              <th (click)="toggleAmsSort('assignedAmcCount')">Assigned AMC</th>
               <th (click)="toggleAmsSort('managerName')">Manager Name</th>
             </tr>
           </thead>
@@ -230,7 +226,6 @@
                 <td>{{ item.amsEid }}</td>
                 <td>{{ item.amsName }}</td>
                 <td>{{ item.assignedAmcCount }}</td>
-                <!-- <td>{{ item.techStack }}</td> -->
                 <td>{{ item.managerName }}</td>
               </tr>
             }
@@ -258,7 +253,8 @@
         @if (currentView() === 'interviews') {
             <section class="widget recent-interviews">
                 <header class="section-header">
-                  <h3>Recent AMC Interview Results</h3>
+                  <h3>Over All Interview Results</h3>
+                
                   <!-- <div class="date-picker-container">
                     <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); filterByDate()">
                     <span>-</span>
@@ -272,7 +268,6 @@
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th (click)="toggleInterviewSort('empId')">Employee ID</th>
                         <th (click)="toggleInterviewSort('name')">Employee Name</th>
                         <th (click)="toggleInterviewSort('client')">Client Name</th>
                         <th (click)="toggleInterviewSort('date')">Interview Date</th>
@@ -283,7 +278,6 @@
                     <tbody>
                       @for(result of paginatedInterviewDetails();track result.name){                      
                       <tr (click)="viewDetails(result)">
-                        <td>{{ result.empId }}</td>
                         <td>{{ result.name }}</td>
                         <td>{{ result.client }}</td>
                         <td>{{ result.date }}</td>

@@ -1,0 +1,30 @@
+<h2>Employee Mapping:  </h2>
+<form class="row-form">
+  @for (row of rows; track row.empId; let i = $index) {     
+  <div  class="row single-row">
+    <mat-form-field appearance="fill" class="field">
+      <mat-label>Employee Name</mat-label>
+      <input matInput [(ngModel)]="row.name" [name]="'name_' + i"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="field">
+      <mat-label>Role</mat-label>
+      <input matInput [(ngModel)]="row.role" [name]="'role_' + i"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="field">
+      <mat-label>Manager Name</mat-label>
+      <input matInput [(ngModel)]="row.mname" [name]="'mname_' + i"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="field">
+      <mat-label>Billable</mat-label>
+      <input matInput [(ngModel)]="row.billable" [name]="'billable_' + i" />
+    </mat-form-field>
+  </div>
+  }
+
+  <div class="actions">
+    <button mat-button type="button" (click)="onCancel()">Close</button>   
+  </div>
+</form>

@@ -1,0 +1,180 @@
+<div class="supervisor-dashboard-container">
+    <div class="content-wrapper">
+      <div class="sidebar">
+        <h2 class="sidebar-title">AppModSupervisor</h2>
+        <nav>
+          <ul class="nav-list">
+            <li>
+              <button 
+                (click)="onViewChange('dashboard')" 
+                [class]="view() === 'dashboard' ? 'nav-button-active' : 'nav-button'"
+              >
+                Dashboard
+              </button>
+            </li>
+            <li>
+              <button 
+                (click)="onViewChange('amcDetails')" 
+                [class]="view() === 'amcDetails' ? 'nav-button-active' : 'nav-button'"
+              >
+                AMC Details
+              </button>
+            </li>
+            <li>
+              <button 
+                (click)="onViewChange('udemyTrack')" 
+                [class]="view() === 'udemyTrack' ? 'nav-button-active' : 'nav-button'"
+              >
+                Udemy Track
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <main class="main-content">
+        <div class="header">
+          <div class="flex-1">
+            <h1 class="header-title">{{ headerTitle() }}</h1>
+            <p class="header-subtitle">Hello, Welcome to AppMod Portal!</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a href="#" class="notification-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.042 5.455 1.31m5.714 0a24.249 24.249 0 00-5.714 0m5.714 0a3 3 0 11-5.714 0M3.75 21V9m-1.5 0h-1.5M21 21V9m1.5 0h1.5M11.25 21V9" />
+              </svg>
+            </a>
+            <button class="sign-out-button">Sign out</button>
+          </div>
+        </div>
+
+        <div class="content-card">
+          @if (view() === 'dashboard') {
+            <div class="p-6">
+              <div class="card mb-8 p-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-xl font-semibold">AMC Details</h3>
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>ID</th>
+                      <th>Tech Stack</th>
+                      <th>DOJ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (amc of amcDetails; track amc.id) {
+                      <tr class="hover-row">
+                        <td>{{ amc.name }}</td>
+                        <td>{{ amc.id }}</td>
+                        <td>{{ amc.techstack }}</td>
+                        <td>{{ amc.doj }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="flex justify-between items-center mt-4">
+                  <a href="#" class="seemore-link">See more</a>
+                </div>
+              </div>
+
+              <div class="card p-6">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-xl font-semibold">AMC Interview Details</h3>
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Interview Date</th>
+                      <th>Feedback</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (interview of amcInterviews; track interview.name) {
+                      <tr class="hover-row">
+                        <td>{{ interview.name }}</td>
+                        <td>{{ interview.interviewDate }}</td>
+                        <td>{{ interview.feedback }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="flex justify-between items-center mt-4">
+                  <a href="#" class="seemore-link">See more</a>
+                </div>
+              </div>
+            </div>
+          } @else if (view() === 'amcDetails') {
+            <div class="p-6">
+              <h2 class="text-2xl font-semibold text-white mb-6">AMC Details</h2>
+              <div class="card p-6">
+                <div class="flex justify-between items-center mb-4">
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Tech Stack</th>
+                      <th>DOJ</th>
+                      <th>Interview Date</th>
+                      <th>Feedback</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (amc of amcDetailsWithInterview; track amc.id) {
+                      <tr class="hover-row">
+                        <td>{{ amc.id }}</td>
+                        <td>{{ amc.name }}</td>
+                        <td>{{ amc.techstack }}</td>
+                        <td>{{ amc.doj }}</td>
+                        <td>{{ amc.interviewDate }}</td>
+                        <td>{{ amc.feedback }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="flex justify-between items-center mt-4">
+                  <a href="#" class="seemore-link">See more</a>
+                </div>
+              </div>
+            </div>
+          } @else if (view() === 'udemyTrack') {
+            <div class="p-6">
+              <h2 class="text-2xl font-semibold text-white mb-6">Udemy Track</h2>
+              <div class="card p-6">
+                <div class="flex justify-between items-center mb-4">
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>AMC Name</th>
+                      <th>Assigned Course</th>
+                      <th>Completion %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (udemy of udemyTracks; track udemy.id) {
+                      <tr class="hover-row">
+                        <td>{{ udemy.id }}</td>
+                        <td>{{ udemy.amcName }}</td>
+                        <td>{{ udemy.assignedCourse }}</td>
+                        <td>{{ udemy.completion }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="flex justify-between items-center mt-4">
+                  <a href="#" class="seemore-link">See more</a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </main>
+    </div>
+</div>

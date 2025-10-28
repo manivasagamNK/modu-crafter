@@ -1,0 +1,182 @@
+<div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="logo">
+          <i class="icon-logo"></i>
+          <span class="logo-text">AppModCollegue</span>
+        </div>
+        <nav class="nav-menu">
+          <ul>
+            <li class="nav-item" [class.active]="currentView() === 'dashboard'">
+              <a (click)="changeView('dashboard')">
+                <i class="icon-dashboard"></i>Dashboard
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'ams'">
+              <a (click)="changeView('ams')">
+                <i class="icon-ams"></i>AMS Details
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'udemy'">
+              <a (click)="changeView('udemy')">
+                <i class="icon-udemy"></i>Udemy Details
+              </a>
+            </li>
+            <li class="nav-item" [class.active]="currentView() === 'interviews'">
+              <a (click)="changeView('interviews')">
+                <i class="icon-interview"></i>Interview Details
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-content">
+            <h1 class="page-title">{{ pageTitle() }}</h1>
+            <p class="welcome-text">Hello, Welcome to AppMod Portal!</p>
+          </div>
+          <div class="user-actions">
+            <i class="icon-bell"></i>
+            <span class="sign-out">Sign out</span>
+          </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <section class="dashboard-form-section" *ngIf="currentView() === 'dashboard'">
+          <div class="widget new-joiner-form">
+            <h3>Please Fill all the Details</h3>
+            <form class="form-grid" [formGroup]="joinerForm" (ngSubmit)="saveNewJoiner()">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name" type="text" formControlName="name" required>
+                <div class="error-message" *ngIf="joinerForm.get('name')?.invalid && joinerForm.get('name')?.touched">
+                  Please enter a valid name
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="empId">Emp ID</label>
+                <input id="empId" type="text" formControlName="empId" required>
+                <div class="error-message" *ngIf="joinerForm.get('empId')?.invalid && joinerForm.get('empId')?.touched">
+                  Please enter a valid employee ID
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="doj">DOJ</label>
+                <input id="doj" type="date" [ngModel]="newJoinerForm().doj" (ngModelChange)="updateForm('doj', $event)" name="doj" required>
+              </div>
+              <div class="form-group">
+                <label for="location">Location</label>
+                <input id="location" type="text" [ngModel]="newJoinerForm().location" (ngModelChange)="updateForm('location', $event)" name="location" required>
+              </div>
+              <div class="form-group skills-group">
+                <label>Tech Stack</label>
+                <div class="skill-input-container">
+                  <div class="skill-controls">
+              
+                    <div class="skill-status" *ngIf="isExtractingSkills()">
+                      <div class="spinner"></div>
+                      <span>Extracting skills...</span>
+                    </div>
+                  </div>
+                  <div class="other-skill-group">
+                    <textarea 
+                      id="techStack" 
+                      rows="3"
+                      [ngModel]="newJoinerForm().techStack" 
+                      (ngModelChange)="updateForm('techStack', $event)" 
+                      name="techStack" 
+                      [placeholder]="isExtractingSkills() ? 'Extracting skills...' : 'Enter skills manually or click Extract from Resume'"
+                      [disabled]="isExtractingSkills()"
+                      [class.extracting]="isExtractingSkills()"
+                    ></textarea>
+                  
+                  </div>
+                </div>
+              </div>
+
+<div class="form-group upload-group">
+                <label for="resume">Upload Resume</label>
+                <input id="resume" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
+              </div>
+              <div class="form-actions">
+                <button type="button" class="save-button" (click)="saveNewJoiner()">Save</button>
+              </div>
+            </form>
+          </div>
+        </section>
+        
+
+        <!-- AMS Details -->
+        <section class="widget ams-details-card" *ngIf="currentView() === 'ams'">
+          <h3>AMS Details</h3>
+          <div class="ams-details-grid">
+            <div class="detail-item">
+              <span class="detail-label">AMS Name:</span>
+              <span class="detail-value">Abxx</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Manager Name:</span>
+              <span class="detail-value">Qwerty</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Location:</span>
+              <span class="detail-value">Chennai</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Contact Details:</span>
+              <span class="detail-value">abc@outlook.com, +91123456789</span>
+            </div>
+          </div>
+        </section>
+        
+
+  <!-- Udemy Details -->
+  <section class="udemy-section" *ngIf="currentView() === 'udemy'">
+            <h3>Assigned Course Details</h3>
+            <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Course Title</th>
+                  <th>Skill Gap</th>
+                  <th>Course Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let Course of CourseDetails()">
+                  <td>{{ udemyCourses.coursetitle }}</td>
+                  <td>{{ udemyCourses.skillgap }}</td>
+                  <td>{{ udemyCourses.courselink }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+            
+        </section>
+        
+
+        <!-- Interview Details -->
+        <section class="widget interview-table" *ngIf="currentView() === 'interviews'">
+          <h3>Interview Details</h3>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Client Name</th>
+                  <th>Interview Date</th>
+                  <th>Feedback</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let interview of interviewDetails()">
+                  <td>{{ interview.client }}</td>
+                  <td>{{ interview.date }}</td>
+                  <td>{{ interview.feedback }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>

@@ -1,0 +1,48 @@
+{
+  "newJoiners": [
+    {"empId": 1,"name": "John ", "location": "Chennai", "doj": "Mar 15, 2025" ,"techStack": "Java, Spring", "billable": false, "riskType": "Medium" ,"amsEid": 101, "role":"AMC", "mname":"abc" },
+    {"empId": 2,"name": "Harish", "location": "Chennai CTW ", "doj": "Mar 14, 2025" ,"techStack": "Python, Django", "billable": true, "riskType": "Low","amsEid": 101,"role":"AMS","mname":"cde" },
+    {"empId": 3,"name": "Alex", "location": "Pune", "doj": "Apr 12, 2025","techStack": "JavaScript, Angular", "billable": false, "riskType": "Medium", "amsEid": 101,"role":"AMS","mname":"efg"},
+    {"empId": 4,"name": "Jessica", "location": "Pune", "doj": "Jan 30, 2025" ,"techStack": "C#, .NET", "billable": true, "riskType": "High","amsEid": 102 ,"role":"AMC","mname":"xyz" },
+    {"empId": 5,"name": "David", "location": "Bangalore", "doj": "Dec 12, 2024" ,"techStack": "React, Node.js", "billable": true, "riskType": "Low","amsEid": 102,"role":"AMS","mname":"ddd"  },
+    {"empId": 6,"name": "Priya", "location": "Bangalore", "doj": "Nov 10, 2024" ,"techStack": "PHP, Laravel", "billable": false, "riskType": "Medium","amsEid": 103,"role":"AMC","mname":"abc"  },
+    {"empId": 7,"name": "William", "location": "Pune", "doj": "Mar 07, 2025" ,"techStack": "Ruby, Rails", "billable": true, "riskType": "High","amsEid": 104,"role":"AMS","mname":"kyc"  },
+    {"empId": 8,"name": "Priya", "location": "Chennai CTW ", "doj": "Apr 12, 2025" ,"techStack": "Go, Gin", "billable": false, "riskType": "Low","amsEid": 104,"role":"AMC","mname":"abc"  }   
+  ],
+  "interviewResults": [
+    { "name": "John Doe", "date": "Mar 14", "category": "Java", "feedback": "Positive", "client": "Acme Corp" , "result": "Selected", "empId":1 },
+    { "name": "Alex", "date": "Mar 12", "category": "Full Stack", "feedback": "Awaiting", "client": "Forad" , "result": "Awaiting", "empId":2   },
+    { "name": "Michael", "date": "Mar 11", "category": "DevOps", "feedback": "Positive", "client": "BNYM" , "result": "Selected", "empId":3   },
+    { "name": "Emily", "date": "Mar 10", "category": "QA", "feedback": "Negative", "client": "BCBSMA" , "result": "UnSelected" , "empId":4  },
+    { "name": "Chris", "date": "Mar 9", "category": "Data Science", "feedback": "Positive", "client": "Medicare" , "result": "Selected", "empId":5   },
+    { "name": "Jessica", "date": "Mar 8", "category": "Cloud", "feedback": "Awaiting","client": "Abcd Corp" , "result": "Selected", "empId":6 },
+    { "name": "David", "date": "Mar 7", "category": "Java", "feedback": "Positive","client": "BCBSMA" , "result": "UnSelected" , "empId":7  },
+    { "name": "Sophia", "date": "Mar 6", "category": "Full Stack", "feedback": "Awaiting","client": "Forad" , "result": "Selected" , "empId":8  },
+    { "name": "Olivia", "date": "Mar 5", "category": "DevOps", "feedback": "Positive","client": "Acme Corp" , "result": "Awaiting" , "empId":9  },
+    { "name": "William", "date": "Mar 4", "category": "QA", "feedback": "Negative" ,"client": "Modu Corp" , "result": "Selected", "empId":10  },
+    { "name": "Benjamin", "date": "Mar 3", "category": "UI/UX", "feedback": "Positive", "client": "Acme Corp" , "result": "Awaiting", "empId":11  }
+  ],
+  "amcData": [
+    { "empId": 1, "empName": "aaa", "resume": "aaa_resume.docx", "feedback": "Awaiting", "ams": "bbb", "udamayTrack": "20% - AI" },
+    { "empId": 2, "empName": "abc", "resume": "abc_resume.docx", "feedback": "Awaiting", "ams": "not assigend", "udamayTrack": "not started" },
+    { "empId": 3, "empName": "xyz", "resume": "xyz_resume.docx", "feedback": "Positive", "ams": "ccc", "udamayTrack": "50% - Web Dev" },
+    { "empId": 4, "empName": "def", "resume": "def_resume.docx", "feedback": "Negative", "ams": "bbb", "udamayTrack": "90% - AI" },
+    { "empId": 5, "empName": "pqr", "resume": "pqr_resume.docx", "feedback": "Awaiting", "ams": "ddd", "udamayTrack": "25% - DevOps" },
+    { "empId": 6, "empName": "xyz", "resume": "xyz_resume.docx", "feedback": "Positive", "ams": "ccc", "udamayTrack": "50% - Web Dev" },
+    { "empId": 7, "empName": "def", "resume": "def_resume.docx", "feedback": "Negative", "ams": "bbb", "udamayTrack": "90% - AI" },
+    { "empId": 8, "empName": "pqr", "resume": "pqr_resume.docx", "feedback": "Awaiting", "ams": "ddd", "udamayTrack": "25% - DevOps" }
+  ],
+  "amsData": [
+    { "amsEid": 101, "amsName": "Alice", "assignedAmcCount": 5, "techStack": "Java, Spring", "managerName": "Bob" },
+    { "amsEid": 102, "amsName": "Charlie", "assignedAmcCount": 3, "techStack": "Python, Django", "managerName": "Bob" },
+    { "amsEid": 103, "amsName": "Dave", "assignedAmcCount": 7, "techStack": "JavaScript, Angular", "managerName": "Eve" },
+    { "amsEid": 104, "amsName": "Frank", "assignedAmcCount": 2, "techStack": "C#, .NET", "managerName": "Eve" },
+    { "amsEid": 105, "amsName": "Grace", "assignedAmcCount": 6, "techStack": "React, Node.js", "managerName": "Heidi" },
+    { "amsEid": 106, "amsName": "Ivan", "assignedAmcCount": 4, "techStack": "PHP, Laravel", "managerName": "Heidi" },
+    { "amsEid": 107, "amsName": "Judy", "assignedAmcCount": 8, "techStack": "Ruby, Rails", "managerName": "Bob" },
+    { "amsEid": 108, "amsName": "Ken", "assignedAmcCount": 1, "techStack": "Go, Gin", "managerName": "Eve" },
+    { "amsEid": 109, "amsName": "Liam", "assignedAmcCount": 9, "techStack": "Python, Flask", "managerName": "Heidi" },
+    { "amsEid": 110, "amsName": "Mona", "assignedAmcCount": 5, "techStack": "Java, Microservices", "managerName": "Bob" }
+  ]
+ 
+}

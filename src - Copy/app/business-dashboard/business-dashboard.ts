@@ -13,14 +13,17 @@ import { BusinessDashboardService } from '../services/business-dashboard.service
 
 // Top-level interface for interview results
 export interface InterviewResult {
-  empId: number;
+    name: string;
+client: any;
+  date: any; // e.g. 'Mar 14'
   result: any;
-  client: any;
-  name: string;
-  date: string; // e.g. 'Mar 14'
-  category: string;
   feedback: string;
 }
+export interface UpdateResultRequest {
+  result: string;
+  feedback: string;
+}
+
 
 @Component({
   selector: 'app-business-dashboard',
@@ -39,7 +42,6 @@ export class BusinessDashboard implements OnInit {
   // Signals for the date range
   startDate = signal<string>('2025-03-01');
   endDate = signal<string>('2025-03-14');
-  amsName: string = '';
 
   // Computed signal for the page title
   pageTitle = computed(() => {
@@ -76,23 +78,14 @@ export class BusinessDashboard implements OnInit {
   
   // Function to handle row clicks
   onRowClick(item: any) {
-    let amsEid = item.amsEid;
-    let result = this.newJoiners1().filter(nj => nj.amsEid === amsEid)
-    console.log('Navigating to details for AMS EID:', amsEid, result);
-    this.onUploadResume(result);
+    console.log('Row clicked:', item);
+    //this.onUploadResume(item);
     // You can implement your navigation logic here
-  }
-
-  onRowClick1(item: any) {
-    let empId = item.empId;
-    let result = this.newJoiners1().filter(ir => ir.empId === empId); 
-    this.onMappingEmployee(result);
   }
 
  
   // New Joiner data as a signal for reactivity (will be loaded from service)
   newJoiners = signal<any[]>([]);
-  newJoiners1 = signal<any[]>([]);
   // Search and sort for New Joiners
   newJoinerSearch = signal<string>('');
   newJoinerSort = signal<{ key: string | null; dir: 'asc' | 'desc' | null }>({ key: null, dir: null });
@@ -217,7 +210,7 @@ export class BusinessDashboard implements OnInit {
     if (search) {
       list = list.filter(r =>
         (r.name || '').toLowerCase().includes(search) ||
-        (r.category || '').toLowerCase().includes(search) ||
+        (r.result || '').toLowerCase().includes(search) ||
         (r.feedback || '').toLowerCase().includes(search)
       );
     }
@@ -283,11 +276,11 @@ export class BusinessDashboard implements OnInit {
       list = list.filter((r: any) =>
         String(r.empId).toLowerCase().includes(search) ||
         (r.empName || '').toLowerCase().includes(search) ||
-        (r.resume || '').toLowerCase().includes(search) ||
-        (r.feedback || '').toLowerCase().includes(search) ||
         (r.ams || '').toLowerCase().includes(search) ||
-        (r.udamayTrack || '').toLowerCase().includes(search)
-      );
+        (r.billable || '').toLowerCase().includes(search) ||
+        (r.riskCategory || '').toLowerCase().includes(search) ||
+        (r.resume || '').toLowerCase().includes(search)
+            );
     }
 
     const sortState = this.amcSort();
@@ -473,55 +466,111 @@ export class BusinessDashboard implements OnInit {
     return gradientString.slice(0, -1) + ')';
   });
 
-  onUploadResume(result:DialogData[]) {    
-    let file: File | null = null;     
-
+  onUploadResume(row:DialogData) {    
+    let file: File | null = null;
   const dialogRef = this.dialog.open(BusinessDashboardDialog, {
-        width: '90vw',      // responsive width (90% of viewport)
-        maxWidth: '1400px', // cap the maximum width
-        height: '80vh',     // taller dialog for more space
-        data: result
+        width: '400px',
+        data: row
       });
 
       dialogRef.afterClosed().subscribe(result => {
         // result is the selected File or null
-        // if(result instanceof File) {
-        //   this.service.uploadResume(row.empId, result).subscribe(res => {
-        //     const name = (res as any).name;
-        //     this.amcData.update(e =>
-        //       e.map(item => item.empId === row?.empId ? { ...item, resume: name } : item)
-        //     );
-        //     this._snackBar.open('Resume uploaded: ' + name, 'Close', { duration: 2000 });
-        //   });
-        // } else {
-        //   console.log('No file selected');
-        // }
-      });
-  }
-
-  onMappingEmployee(result:DialogData[]) {    
-    let file: File | null = null;     
-
-  const dialogRef = this.dialog.open(EmployeeMappingDialog, {
-        width: '90vw',      // responsive width (90% of viewport)
-        maxWidth: '1400px', // cap the maximum width
-        height: '80vh',     // taller dialog for more space
-        data: result
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-      
+        if(result instanceof File) {
+          this.service.uploadResume(row.empId, result).subscribe(res => {
+            const name = (res as any).name;
+            this.amcData.update(e =>
+              e.map(item => item.empId === row?.empId ? { ...item, resume: name } : item)
+            );
+            this._snackBar.open('Resume uploaded: ' + name, 'Close', { duration: 2000 });
+          });
+        } else {
+          console.log('No file selected');
+        }
       });
   }
 
   ngOnInit(): void {
-    // Load mock data from the service
-    this.service.getNewJoiners().subscribe(nj => this.newJoiners.set(nj));
-    this.service.getNewJoiners().subscribe(nj => this.newJoiners1.set(nj));
-    this.service.getInterviewResults().subscribe(ir => this.interviewResults.set(ir));
-    this.service.getAmcData().subscribe(a => this.amcData.set(a));
-    this.service.getAmsData().subscribe(a => this.amsData.set(a));
+    this.loadAmcEmployees();
+    this.loadInterviewSummary();
+    this.loadAmsEmployees();
   }
+loadInterviewSummary() {
+  this.service.getInterviewData().subscribe({
+    next: (data) => {
+      // Backend returns EmployeeInterviewSummaryDTO list
+      const mapped = data.map((i: any) => ({
+        name: i.name || i.empName || 'Unknown',
+        client: i.client || i.clientName || 'N/A',
+        date: i.interviewDate || i.interviewDate || '',
+        result: i.result || i.status || 'N/A',
+        feedback: i.feedback || i.remarks || '-',
+      }));
+
+      this.interviewResults.set(mapped);
+      console.log('Interview summary loaded:', mapped);
+    },
+    error: (err) => {
+      console.error(' Error loading interview summary', err);
+    }
+  });
+}
+  loadAmcEmployees() {
+  this.service.getAmcEmployees().subscribe({
+    next: (data) => {
+      // ✅ Transform backend data to only what UI needs
+      const mapped = data.map((emp: any) => ({
+        empId: emp.empId,
+        empName: emp.name,
+        ams: emp.amsName,
+        billable: emp.isBillable ? 'Yes' : 'No',
+        riskCategory: this.calculateRiskCategory(emp), // optional logic
+        resume: emp.resumeUrl // if backend supports resume upload/download
+      }));
+
+      this.amcData.set(mapped);
+      console.log('AMC Employees (mapped):', mapped);
+    },
+    error: (err) => {
+      console.error('Error loading AMC employees', err);
+    }
+  });
+}
+
+loadAmsEmployees() {
+  this.service.getAmsEmployees().subscribe({
+    next: (data) => {
+      // ✅ Transform backend data to only what UI needs
+      const mapped = data.map((emp: any) => ({
+        amsEid: emp.empId,
+        amsName: emp.name,
+        assignedAmcCount:2,
+        managerName: emp.managerName,
+      }));
+
+      this.amsData.set(mapped);
+      console.log('AMS Employees (mapped):', mapped);
+    },
+    error: (err) => {
+      console.error('Error loading AMS Data', err);
+    }
+  });
+}
+downloadResume(emp: any) {
+  this.service.downlaodResume(emp.empId).subscribe({
+    next: (blob) => {
+      const fileURL = URL.createObjectURL(blob);
+      window.open(fileURL, '_blank');
+    },
+    error: (err) => {
+      console.error('Error downloading resume', err);
+    }
+  });
+}
+private calculateRiskCategory(emp: any): string {
+  if (!emp.isBillable) return 'At Risk';
+  if (emp.techStack?.includes('Kafka')) return 'High Demand';
+  return 'Stable';
+}
 
    // Open the InterviewResultDialog to view/edit a specific interview result
   viewDetails(result: InterviewResult) {
@@ -563,59 +612,23 @@ export class BusinessDashboard implements OnInit {
       }
     });
   }
-  
-  
-files = [
-    { name: 'download.txt', url: 'C:\angular\modu-crafter-main\src\assets\files\download.txt' }
-  ];
-
-  
- downloadTextFile() {
-  // 1. Define the content and desired filename
-  const fileContent = "Name,Age\nAlice,30\nBob,25";
-  const filename = "user_data.csv";
-  const fileType = "text/csv";
-
-  // 2. Create a Blob
-  const blob = new Blob([fileContent], { type: fileType });
-
-  // 3. Create a temporary <a> element
-  const a = document.createElement('a');
-  a.style.display = 'none'; // Keep it invisible
-
-  // 4. Set the attributes
-  a.href = URL.createObjectURL(blob); // Temporary URL
-  a.download = filename;              // Desired filename
-
-  // 5. Programmatically click the link to trigger the download
-  document.body.appendChild(a);
-  a.click();
-
-  // 6. Clean up: Revoke the object URL and remove the link
-  URL.revokeObjectURL(a.href);
-  document.body.removeChild(a);
-}
 
 
 }
 
 export interface DialogData {
   empId: number;
-  name: string;
-  location: string;
-  doj: string;
-  techStack: string;  
-  billable: boolean;
-  riskType: string;  
-  amsEid: number;
-  role: string;
-  mname: string;
+  empName: string;
+  resume: string;
+  feedback: string;
+  ams: string;
+  udamayTrack: string;
 }
 
 @Component({
-  selector: 'business-dashboard-ams-dialog',
-  templateUrl: 'business-dashboard-ams-dialog.html',
-  styleUrl: './business-dashboard-ams-dialog.css',
+  selector: 'business-dashboard-dialog',
+  templateUrl: 'business-dashboard-dialog.html',
+  styleUrl: './business-dashboard-dialog.css',
   standalone: true,
   imports: [CommonModule,FormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule,MatIconModule
@@ -623,15 +636,11 @@ export interface DialogData {
 })
 export class BusinessDashboardDialog {
   @ViewChild('fileInput') fileInput!: ElementRef;
-  selectedFile: File | null = null;  
-  rows: DialogData[] = [];
+  selectedFile: File | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<BusinessDashboardDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData[]) { 
-     this.rows = data;
-     console.log('Dialog data:', this.rows);
-    }
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) { }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -649,10 +658,6 @@ export class BusinessDashboardDialog {
   onCancel(): void {
     this.dialogRef.close(null); // Close dialog without a file
   }
-
-  onClose(): void {
-    this.dialogRef.close();
-  } 
 
 }
 
@@ -697,66 +702,12 @@ export class InterviewResultDialog {
   // Add a new empty row inside the dialog for the user to fill
   onAdd(): void {
     const originalName = this.rows[0]?.item?.name ?? '';
-    const empId = this.rows[0]?.item?.empId ?? 0;
     const now = new Date();
     const dateStr = now.toLocaleString('en-US', { month: 'short' }) + ' ' + now.getDate();
     this.rows.push({ item: {
-      empId: empId,
-      name: originalName, date: dateStr, category: '', feedback: '',
+      name: originalName, date: dateStr, feedback: '',
       result: '',
       client: ''
     }, original: false });
   }
-}
-
-
-@Component({
-  selector: 'employee-mapping-dialog',
-  templateUrl: './business-dashboard-dash-dialog.html',
-  styleUrl: './business-dashboard-dash-dialog.css',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
-})
-export class EmployeeMappingDialog {
-  // internal editable rows; original indicates the incoming item
-  rows: DialogData[] = [];
-
-  constructor(
-    public dialogRef: MatDialogRef<EmployeeMappingDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData[]) { 
-     this.rows = data;
-     console.log('Dialog data:', this.rows);
-    }
-
-
-  // Save: return all rows back to the caller
-  // onSave(): void {
-  //   const items = this.rows.map(r => r.item);
-  //   for (let i = 0; i < items.length; i++) {
-  //     if(items[i].name === '' || items[i].client === '' || items[i].date === '' ||
-  //       items[i].result === '' || items[i].feedback === '') {
-  //         alert('Please fill all fields for row ' + (i + 1));
-  //         return;
-  //       }
-  //     }
-  //       this.dialogRef.close({ action: 'save', items });
-  // }
-
-  onCancel(): void {
-    this.dialogRef.close(null);
-  }
-
-  // Add a new empty row inside the dialog for the user to fill
-  // onAdd(): void {
-  //   const originalName = this.rows[0]?.item?.name ?? '';
-  //   const empId = this.rows[0]?.item?.empId ?? 0;
-  //   const now = new Date();
-  //   const dateStr = now.toLocaleString('en-US', { month: 'short' }) + ' ' + now.getDate();
-  //   this.rows.push({ item: {
-  //     empId: empId,
-  //     name: originalName, date: dateStr, category: '', feedback: '',
-  //     result: '',
-  //     client: ''
-  //   }, original: false });
-  // }
 }

@@ -1,0 +1,61 @@
+/* Simple styling for the interview dialog */
+:host {
+  display: block;
+  padding: 16px;
+}
+
+mat-form-field {
+  margin-top: 8px;
+}
+
+.row-form .row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.row-form .field {
+  flex: 1 1 0;
+}
+
+.row-form .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Stack fields on small screens */
+@media (max-width: 480px) {
+  .row-form .row {
+    flex-direction: column;
+  }
+}
+
+/* Make all fields sit in a single non-wrapping row (table-like) */
+.row-form .row.single-row {
+  flex-wrap: nowrap;
+}
+
+/* If the container is too narrow, allow wrapping to maintain usability */
+@media (max-width: 720px) {
+  .row-form .row.single-row {
+    flex-wrap: wrap;
+  }
+  .row-form .row.single-row .field {
+    flex: 1 1 45%; /* two columns when wrapped */
+  }
+}
+
+/* Visual hint for read-only fields (Name, Date, Category) */
+input[readonly] {
+  background-color: rgba(0,0,0,0.02);
+  pointer-events: none;
+  color: rgba(0,0,0,0.7);
+}
+
+/* Ensure feedback input looks editable */
+.row-form .row.single-row .field input:not([readonly]) {
+  background-color: transparent;
+  pointer-events: auto;
+}
